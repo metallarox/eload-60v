@@ -1,0 +1,47 @@
+ERC report (2026-10-25T21:30:16, Encoding UTF8)
+Report includes: Errors, Warnings, Exclusions
+
+***** Sheet /
+[lib_symbol_mismatch]: Symbol 'LM393' doesn't match copy in library 'Comparator'
+    ; warning
+    @(91.44 mm, 180.34 mm): Symbol U2 [LM393]
+[lib_symbol_mismatch]: Symbol 'LM393' doesn't match copy in library 'Comparator'
+    ; warning
+    @(175.26 mm, 180.34 mm): Symbol U2 [LM393]
+[lib_symbol_mismatch]: Symbol 'LM393' doesn't match copy in library 'Comparator'
+    ; warning
+    @(236.22 mm, 165.10 mm): Symbol U2 [LM393]
+[lib_symbol_mismatch]: Symbol 'OPA2196xD' doesn't match copy in library 'Amplifier_Operational'
+    ; warning
+    @(22.86 mm, 190.50 mm): Symbol U3 [OPA2196xD]
+[lib_symbol_mismatch]: Symbol 'OPA2196xD' doesn't match copy in library 'Amplifier_Operational'
+    ; warning
+    @(58.42 mm, 190.50 mm): Symbol U6 [OPA2196xD]
+[lib_symbol_mismatch]: Symbol 'OPA2196xD' doesn't match copy in library 'Amplifier_Operational'
+    ; warning
+    @(81.28 mm, 58.42 mm): Symbol U3 [OPA2196xD]
+[lib_symbol_mismatch]: Symbol 'OPA2196xD' doesn't match copy in library 'Amplifier_Operational'
+    ; warning
+    @(81.28 mm, 128.27 mm): Symbol U6 [OPA2196xD]
+[lib_symbol_mismatch]: Symbol 'OPA2196xD' doesn't match copy in library 'Amplifier_Operational'
+    ; warning
+    @(281.94 mm, 58.42 mm): Symbol U3 [OPA2196xD]
+[lib_symbol_mismatch]: Symbol 'OPA2196xD' doesn't match copy in library 'Amplifier_Operational'
+    ; warning
+    @(281.94 mm, 128.27 mm): Symbol U6 [OPA2196xD]
+
+***** Sheet /Ingresso e protezioni/
+
+***** Sheet /Canali di potenza/
+
+***** Sheet /Controllo/
+
+***** Sheet /Alimentazione/
+
+ ** ERC messages: 9  Errors 0  Warnings 9
+
+ ** Ignored checks:
+    - Global label only appears once in the schematic
+    - Four connection points are joined together
+    - SPICE model issue
+    - Assigned footprint doesn't match footprint filters

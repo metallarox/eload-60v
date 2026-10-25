@@ -1,0 +1,3 @@
+(sym_lib_table
+  (lib (name "carico")(type "KiCad")(uri "${KIPRJMOD}/carico.kicad_sym")(options "")(descr "Simboli custom: INA228, ADuM3160"))
+)
