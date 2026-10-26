@@ -90,9 +90,10 @@ Schematic, PCB and the KiCad BOM are in English. The priced BOM workbook (`eload
 
 ## Firmware
 
-v0.1.0 for the D1 mini Pro. It compiles and its control math is unit-tested, but it has **not yet run on hardware**.
+v0.2.0 for the D1 mini Pro. It compiles and its control math is unit-tested, but it has **not yet run on hardware**.
 - **Control:** CC / CP / CR with the setpoint shared by the channels, hardware and firmware protections with the trip cause reported, battery cutoff, auto-trim.
-- **Front panel:** OLED with the logo at boot, encoder used as a vernier, OUTPUT button.
+- **Pulsed load:** the sink switches between the setpoint and 10 mA at 0.1 Hz – 1 kHz with an adjustable duty, set from the panel menu or the web page.
+- **Front panel:** OLED with the logo at boot, encoder used as a vernier and to drive the menu, OUTPUT button.
 - **Logging:** CSV on the 14 MB flash.
 - **Web:** live chart, controls, OTA update.
 
@@ -114,6 +115,7 @@ v0.1.0 for the D1 mini Pro. It compiles and its control math is unit-tested, but
 
 ## Changelog
 
+- **firmware 0.2.0** — pulsed load (frequency 0.1 Hz – 1 kHz, duty 1 – 99 %, phases ≥ 100 µs) in the panel menu, the web page, the API and the CSV.
 - **firmware 0.1.0** — first firmware: control, protections, OLED + encoder panel, CSV logging, web interface, OTA.
 
 - **rev 0.3** — front panel: PCF8574 expander, 10-pin IDC connector, debounce, I²C pull-ups 2.2 kΩ. Schematic and PCB translated to English (sheets: input, channels, control, power). Silkscreen cleaned up: no overlaps, references next to their parts; interactive BOM and assembly drawings.

@@ -5,8 +5,9 @@ import json, math, os, sys, time, random
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs
 HERE = os.path.dirname(os.path.abspath(__file__))
-S = dict(out=0, mode='CC', set=2.0, mask=15, vcut=10.5, trim=1, trip='', wh=0.0, ah=0.0, t=28.0, log_on=0, lines=0)
+S = dict(out=0, mode='CC', set=2.0, mask=15, vcut=10.5, trim=1, trip='', pulse=0, pf=10.0, pd=50.0, wh=0.0, ah=0.0, t=28.0, log_on=0, lines=0)
 T0 = time.time(); hist = []
+def dlim(f): return max(1.0, round(100e-6 * f * 100, 1))
 def chlim(v): return min(5.0, 75.0 / max(v, .1))
 def step():
     up = int(time.time() - T0)
@@ -17,6 +18,7 @@ def step():
         want = S['set'] if S['mode'] == 'CC' else (S['set'] / v0 if S['mode'] == 'CP' else v0 / S['set'])
     n = bin(S['mask']).count('1') or 1
     ich = [min(want / n, chlim(soc_v)) if S['mask'] & (1 << c) and S['out'] else 0 for c in range(4)]
+    if S['pulse'] and S['out']: ich = [x * S['pd'] / 100 + 0.01 * (1 - S['pd'] / 100) if x else 0 for x in ich]   # INA average
     i = sum(ich); v = soc_v - 0.05 * i
     S['ah'] += i / 3600 / 2; S['wh'] += i * v / 3600 / 2
     S['t'] += (25 + 0.12 * i * v - S['t']) * 0.02
@@ -33,10 +35,11 @@ class H(BaseHTTPRequestHandler):
             up, v, ich = step(); p = [x * v for x in ich]
             if len(hist) == 0 or hist[-1][4] != up: hist.append([round(v * 100), round(sum(ich) * 1000), round(sum(p) * 10), round(S['t']), up])
             if S['log_on']: S['lines'] = up
-            return self.send(200, json.dumps(dict(fw='0.1.0-mock', up=up, time=time.strftime('%Y-%m-%d %H:%M:%S'), v=v, i=sum(ich), p=sum(p),
+            return self.send(200, json.dumps(dict(fw='0.2.0-mock', up=up, time=time.strftime('%Y-%m-%d %H:%M:%S'), v=v, i=sum(ich), p=sum(p),
                 ich=[x * (1 + random.uniform(-.001, .001)) for x in ich], pch=p, icmd=[max(x, .01) if S['out'] and S['mask'] >> c & 1 else 0 for c, x in enumerate(ich)],
                 tdie=[S['t'] - 3 + c for c in range(4)], ina=[1, 1, 1, 1], t=S['t'], fan=min(1, .25 + sum(p) / 300), rpm=1200 if S['out'] else 600,
-                wh=S['wh'], ah=S['ah'], out=S['out'], mode=S['mode'], set=S['set'], setmax=20 if S['mode'] == 'CC' else (300 if S['mode'] == 'CP' else 10000),
+                wh=S['wh'], ah=S['ah'], out=S['out'], mode=S['mode'], set=S['set'],
+                pulse=dict(on=S['pulse'], f=S['pf'], d=S['pd'], dmin=dlim(S['pf']), dmax=100 - dlim(S['pf'])), setmax=20 if S['mode'] == 'CC' else (300 if S['mode'] == 'CP' else 10000),
                 mask=S['mask'], vcut=S['vcut'], trim=S['trim'], gain=[1.0012, .9987, 1.0005, 1.0021], trip=S['trip'], tripch=-1,
                 log=dict(on=S['log_on'], lines=S['lines'], bytes=S['lines'] * 92, int=1, free=14_000_000),
                 wifi=dict(ap=0, ssid='Lab', rssi=-58, ip='192.168.1.42', host='eload'))))
@@ -54,6 +57,10 @@ class H(BaseHTTPRequestHandler):
                 if k in q: S[k] = float(q[k])
             for k in ('mask', 'trim', 'out'):
                 if k in q: S[k] = int(q[k])
+            if 'freq' in q: S['pf'] = min(1000, max(0.1, float(q['freq'])))
+            if 'duty' in q: S['pd'] = float(q['duty'])
+            S['pd'] = min(100 - dlim(S['pf']), max(dlim(S['pf']), S['pd']))
+            if 'pulse' in q: S['pulse'] = int(q['pulse'])
             if 'reset' in q: S['wh'] = S['ah'] = 0
         elif self.path == '/api/log':
             S['log_on'] = 1 if q.get('action') == 'start' else 0

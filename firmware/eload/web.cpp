@@ -57,12 +57,13 @@ static void err(const char *msg) { sendJson(String("{\"ok\":false,\"msg\":\"") +
 
 static void handleStatus() {
     static const char *M[] = {"CC", "CP", "CR"};
-    char b[1400]; char ts[32]; timeString(ts, sizeof ts);
+    char b[1600]; char ts[32]; timeString(ts, sizeof ts);
     int n = snprintf(b, sizeof b,
         "{\"fw\":\"%s\",\"up\":%lu,\"time\":\"%s\",\"v\":%.4f,\"i\":%.4f,\"p\":%.3f,"
         "\"ich\":[%.4f,%.4f,%.4f,%.4f],\"pch\":[%.3f,%.3f,%.3f,%.3f],\"icmd\":[%.4f,%.4f,%.4f,%.4f],"
         "\"tdie\":[%.1f,%.1f,%.1f,%.1f],\"ina\":[%d,%d,%d,%d],\"t\":%.1f,\"fan\":%.2f,\"rpm\":%u,"
-        "\"wh\":%.4f,\"ah\":%.4f,\"out\":%d,\"mode\":\"%s\",\"set\":%.4f,\"setmax\":%.1f,\"mask\":%u,"
+        "\"wh\":%.4f,\"ah\":%.4f,\"out\":%d,\"mode\":\"%s\",\"set\":%.4f,"
+        "\"pulse\":{\"on\":%d,\"f\":%.3f,\"d\":%.1f,\"dmin\":%.1f,\"dmax\":%.1f},\"setmax\":%.1f,\"mask\":%u,"
         "\"vcut\":%.3f,\"trim\":%d,\"gain\":[%.4f,%.4f,%.4f,%.4f],\"trip\":\"%s\",\"tripch\":%d,"
         "\"log\":{\"on\":%d,\"lines\":%lu,\"bytes\":%lu,\"int\":%u,\"free\":%lu},"
         "\"wifi\":{\"ap\":%d,\"ssid\":\"%s\",\"rssi\":%d,\"ip\":\"%s\",\"host\":\"%s\"}}",
@@ -71,7 +72,9 @@ static void handleStatus() {
         load.iCmd[0], load.iCmd[1], load.iCmd[2], load.iCmd[3],
         load.tDie[0], load.tDie[1], load.tDie[2], load.tDie[3],
         load.inaOk[0], load.inaOk[1], load.inaOk[2], load.inaOk[3], load.tSpreader, load.fan, load.rpm,
-        load.wh, load.ah, load.out, M[load.mode], load.set, setMax(load.mode), settings.mask,
+        load.wh, load.ah, load.out, M[load.mode], load.set,
+        load.pulse, settings.pulseFreq, settings.pulseDuty, pulseClampDuty(settings.pulseFreq, 0), pulseClampDuty(settings.pulseFreq, 100),
+        setMax(load.mode), settings.mask,
         settings.vCutoff, settings.autoTrim, settings.gain[0], settings.gain[1], settings.gain[2], settings.gain[3],
         tripName(load.trip), load.tripCh,
         logActive(), (unsigned long)logLines(), (unsigned long)logBytes(), settings.logInterval, (unsigned long)fsFree(),
@@ -114,6 +117,10 @@ static void handleSet() {
         }
     }
     if (server.hasArg("set")) loadSetpoint(server.arg("set").toFloat());
+    if (server.hasArg("freq") || server.hasArg("duty"))
+        loadSetPulseParams(server.hasArg("freq") ? server.arg("freq").toFloat() : settings.pulseFreq,
+                           server.hasArg("duty") ? server.arg("duty").toFloat() : settings.pulseDuty);
+    if (server.hasArg("pulse")) loadSetPulse(server.arg("pulse").toInt() != 0);
     if (server.hasArg("out")) {
         if (!loadSetOutput(server.arg("out").toInt() != 0)) { err(tripName(load.trip)); return; }
     }

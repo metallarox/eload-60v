@@ -41,7 +41,7 @@ bool logStart(uint16_t intervalS) {
     if (!logFile) return false;
     char ts[32]; timeString(ts, sizeof ts);
     logFile.printf("# %s %s, started %s, interval %u s\n", FW_NAME, FW_VERSION, ts, settings.logInterval);
-    logFile.print("time,elapsed_s,output,mode,setpoint,V,I_total_A,P_total_W,I1_A,I2_A,I3_A,I4_A,Wh,Ah,T_spreader_C,trip\n");
+    logFile.print("time,elapsed_s,output,mode,setpoint,pulse_Hz,duty_pct,V,I_total_A,P_total_W,I1_A,I2_A,I3_A,I4_A,Wh,Ah,T_spreader_C,trip\n");
     lines = 0; sinceFlush = 0; logT0 = millis(); active = true;
     loadResetCounters();
     return true;
@@ -62,8 +62,10 @@ void logTick() {
     if (fsFree() < 64 * 1024) { logStop(); return; }                 // keep some room for settings
     char ts[32]; timeString(ts, sizeof ts);
     static const char *M[] = {"CC", "CP", "CR"};
-    logFile.printf("%s,%lu,%d,%s,%.4f,%.4f,%.4f,%.3f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.1f,%s\n", ts,
-                   (unsigned long)((millis() - logT0) / 1000), load.out, M[load.mode], load.set, load.v, load.iTot,
+    char pf[12] = "", pd[8] = "";                                    // empty when the load is continuous
+    if (load.pulse) { snprintf(pf, sizeof pf, "%.3f", settings.pulseFreq); snprintf(pd, sizeof pd, "%.1f", settings.pulseDuty); }
+    logFile.printf("%s,%lu,%d,%s,%.4f,%s,%s,%.4f,%.4f,%.3f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.1f,%s\n", ts,
+                   (unsigned long)((millis() - logT0) / 1000), load.out, M[load.mode], load.set, pf, pd, load.v, load.iTot,
                    load.pTot, load.i[0], load.i[1], load.i[2], load.i[3], load.wh, load.ah, load.tSpreader,
                    tripName(load.trip));
     lines++;

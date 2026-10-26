@@ -3,6 +3,7 @@
 #include "ina228.h"
 #include "dac8565.h"
 #include "settings.h"
+#include "pulse.h"
 
 LoadState load;
 static INA228 ina[N_CH] = {INA228(INA_ADDR[0]), INA228(INA_ADDR[1]), INA228(INA_ADDR[2]), INA228(INA_ADDR[3])};
@@ -34,6 +35,7 @@ float setMax(Mode m) { return m == MODE_CC ? N_CH * I_CH_MAX : (m == MODE_CP ? N
 static void hardOff() {
     digitalWrite(PIN_ARM_DRV, LOW);          // ARM low -> CLAMP shorts all setpoints in hardware
     armed = false;
+    pulseStop();                             // the DAC belongs to the main code again
     dac.allZero();
     for (int c = 0; c < N_CH; c++) load.iCmd[c] = 0;
     load.out = false;
@@ -87,6 +89,25 @@ void loadSetpoint(float set) {
         return;
     }
     load.set = clampf(set, 0.0f, setMax(load.mode));
+}
+
+// INA228 ADC: CW = bus+shunt+temp, 540 us each, 16 averages (~26 ms).
+// Pulsed = bus 50 us + shunt 540 us, no temperature, 128 averages (~75 ms): the shunt is sampled ~92 % of
+// the time and the window spans more than the 50 ms read interval, so the readings are true averages
+// for pulse frequencies above ~20 Hz. Below that they follow the waveform.
+static const uint16_t ADC_CW    = (0xF << 12) | (4 << 9) | (4 << 6) | (4 << 3) | 2;
+static const uint16_t ADC_PULSE = (0xB << 12) | (0 << 9) | (4 << 6) | (0 << 3) | 4;
+
+void loadSetPulse(bool on) {
+    if (on == load.pulse) return;
+    load.pulse = on;
+    for (int c = 0; c < N_CH; c++) if (load.inaOk[c]) ina[c].setAdcConfig(on ? ADC_PULSE : ADC_CW);
+    if (!on && pulseRunning()) { pulseStop(); if (load.out) loadUpdate(); }   // back to steady codes at once
+}
+
+void loadSetPulseParams(float freq, float duty) {
+    settings.pulseFreq = pulseClampFreq(freq);
+    settings.pulseDuty = pulseClampDuty(settings.pulseFreq, duty);
 }
 
 void loadResetCounters() { for (int c = 0; c < N_CH; c++) if (load.inaOk[c]) ina[c].resetAccumulators(); }
@@ -153,12 +174,23 @@ void loadUpdate() {
     float target = modeTarget(load.mode, load.set, load.v);
     float ich[N_CH];
     distribute(target, settings.mask, load.v, ich);
+    uint16_t hi[N_CH], lo[N_CH];
     for (int c = 0; c < N_CH; c++) {
         bool en = settings.mask & (1 << c);
         float a = en ? (ich[c] > I_KEEPALIVE ? ich[c] : I_KEEPALIVE) : 0;
-        if (en && settings.autoTrim && millis() - load.onSince > 500)
+        // the INA228 reads the average in pulsed mode: no trim there
+        if (en && !load.pulse && settings.autoTrim && millis() - load.onSince > 500)
             settings.gain[c] = trimGain(settings.gain[c], load.iCmd[c], load.i[c]);
         load.iCmd[c] = a;
-        dac.write(c, dacCode(a, settings.gain[c], settings.offset[c]));
+        hi[c] = dacCode(a, settings.gain[c], settings.offset[c]);
+        lo[c] = en ? dacCode(I_KEEPALIVE, settings.gain[c], settings.offset[c]) : 0;
+    }
+    if (load.pulse) {
+        uint32_t hiUs, loUs;
+        pulseTimes(settings.pulseFreq, settings.pulseDuty, hiUs, loUs);
+        pulseSet(hi, lo, hiUs, loUs);         // the ISR owns the DAC from here on
+    } else {
+        if (pulseRunning()) pulseStop();
+        for (int c = 0; c < N_CH; c++) dac.write(c, hi[c]);
     }
 }

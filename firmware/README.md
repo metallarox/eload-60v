@@ -2,7 +2,7 @@
 
 Firmware for the Wemos LOLIN **D1 mini Pro** (ESP8266) that controls the 4-channel electronic load: measurement, constant current / power / resistance, protections, front-panel OLED and encoder, data logging and a web interface.
 
-> **Status: v0.1.0 — compiles and the control math passes its unit tests, but it has not run on real hardware yet.** Bring the board up with a current-limited supply and no DUT first (see *Bring-up*).
+> **Status: v0.2.0 — compiles and the control math passes its unit tests, but it has not run on real hardware yet.** Bring the board up with a current-limited supply and no DUT first (see *Bring-up*).
 
 ![Web interface](../docs/images/web_ui.png)
 
@@ -16,12 +16,15 @@ Firmware for the Wemos LOLIN **D1 mini Pro** (ESP8266) that controls the 4-chann
   - The ARM read-back detects a hardware trip, and the firmware reports its cause (OVP, OCP, OPP, OTP).
   - During a firmware update the output is forced off.
 - **Measurement**: 20-bit INA228 per channel. The firmware reports bus voltage, current, power, energy (Wh) and charge (Ah) from the on-chip accumulators, plus die temperatures and the spreader NTC.
+- **Pulsed load** (v0.2): instead of a continuous (CW) sink, the load can switch between the setpoint and the keep-alive current at a chosen frequency and duty. See *Pulsed load* below.
 - **Keep-alive**: 10 mA per channel while the output is on, so steps start in the linear region (see the loop analysis in the slides).
 - **Auto-trim**: a slow closed-loop gain trim makes the setpoint match the INA228 reading (±5 % range). Save it with *Save calibration*.
 - **Fan**: 25 kHz PWM driven by spreader temperature and dissipated power, with RPM measured from the tach.
 - **Front panel**:
   - The OLED shows a boot splash with the logo and the IP address, then V / I / P, one line per channel, and the setpoint with an edit cursor.
-  - Encoder: turning changes the setpoint; a short push moves the cursor to the next digit (vernier); a long push (0.7 s) changes the mode while the output is off.
+  - Encoder: turning changes the setpoint; a short push moves the cursor to the next digit (vernier); a long push (0.7 s) opens the menu.
+  - Menu: *Mode* (CC/CP/CR, only with the output off), *Pulse* (ON/OFF), *Freq*, *Duty*, *Exit*. Turn to select, short push to edit (the value shows as `<value>`), turn to change it, short push to confirm. A long push or *Exit* closes the menu and saves the frequency and duty. Turning quickly makes larger steps (×10 on the frequency, 5 % on the duty).
+  - With the pulse on, the right column of the main screen shows `PULSE`, the frequency, the duty and `AVG`, because the readings are averages.
   - OUTPUT button: toggles the output. After a trip, the first press only acknowledges it. The LED shows the output state.
 - **Logging**:
   - A 10-minute RAM history (1 s) feeds the web chart.
@@ -30,6 +33,36 @@ Firmware for the Wemos LOLIN **D1 mini Pro** (ESP8266) that controls the 4-chann
   - Single page served gzipped from flash, no external resources (works on the setup access point).
   - Live readings, controls, channel table, chart, logging, WiFi setup, calibration.
   - OTA update at `/update`, or with ArduinoOTA / `espota.py`. `http://eload.local` via mDNS.
+
+## Pulsed load
+
+![OLED screens](../docs/images/oled_pulse_menu.png)
+
+The load alternates between two levels:
+
+| Phase | Lasts | Current |
+|---|---|---|
+| High | duty × period | the setpoint (CC, CP or CR, computed from the measured voltage as in CW) |
+| Low | the rest | the 10 mA keep-alive on each enabled channel, so the loop never saturates and the edges stay fast |
+
+**Limits.**
+- Frequency 0.1 Hz – 1 kHz, duty 1 – 99 %.
+- Each phase lasts at least 100 µs. The CC loop needs about 30 – 50 µs per edge (10 – 90 %, from the loop simulation), so the edges stay a small part of the pulse. As a consequence, the allowed duty narrows above 100 Hz: 10 – 90 % at 1 kHz. The panel and the page clamp it automatically and show the range.
+- The high level obeys the same per-channel limits as CW (5 A, 75 W), so the peak stays inside the MOSFET SOA. The average dissipation is lower than in CW.
+
+**How it works.**
+- A callback on timer1 (the core waveform NMI, shared with the fan PWM) writes the four DAC channels straight through the HSPI registers at every edge. One edge takes about 12 µs.
+- The control loop keeps running every 50 ms. It recomputes both levels (CP/CR follow the voltage) and hands them over through a double buffer. While the pulse runs, only the ISR touches the DAC.
+- Any trip or OUTPUT off stops the pulse before the DAC is zeroed; the hardware clamp acts independently.
+- The edge timing jitter is a few µs, from the shared NMI and the WiFi.
+
+**Measurements.**
+- In pulsed mode the INA228s switch to bus + shunt conversions with 128 averages, about 75 ms per result, with the shunt sampled about 92 % of the time.
+- Above about 20 Hz the readings, Wh and Ah are therefore averages. Below that they follow the waveform.
+- Auto-trim pauses while the pulse is on.
+- The INA228 hardware limits still compare each single 540 µs conversion, so they also see the peaks.
+
+**Logging.** The CSV has two more columns, `pulse_Hz` and `duty_pct`. They are empty when the load is continuous.
 
 ## Building
 
@@ -50,7 +83,7 @@ git clone --depth 1 https://github.com/olikraus/U8g2_Arduino.git ~/esp/libs/U8g2
 ./build.sh flash        # upload over USB (DUT and fan disconnected, see below)
 ```
 
-A prebuilt image is in `bin/`. Memory use: 420 kB flash, 39 kB of 80 kB RAM.
+A prebuilt image is in `bin/`. Memory use: 430 kB flash, 39 kB of 80 kB RAM.
 
 **Display**: the default is the 2.42″ SSD1309. For a 1.3″ SH1106 module, add `-DDISPLAY_SH1106` (`./build.sh BUILD_EXTRA_FLAGS=-DDISPLAY_SH1106`).
 
@@ -74,7 +107,7 @@ A prebuilt image is in `bin/`. Memory use: 420 kB flash, 39 kB of 80 kB RAM.
 |---|---|---|---|
 | GET | `/api/status` | — | All readings and settings as JSON |
 | GET | `/api/history` | — | Last 600 s: `[V×100, mA, W×10, °C]` |
-| POST | `/api/set` | `out=0/1`, `mode=CC/CP/CR`, `set=<A/W/Ω>`, `mask=0..15`, `vcut=<V>`, `trim=0/1`, `reset=1`, `clear=1`, `save=1` | Mode can change only with the output off |
+| POST | `/api/set` | `out=0/1`, `mode=CC/CP/CR`, `set=<A/W/Ω>`, `pulse=0/1`, `freq=<Hz>`, `duty=<%>`, `mask=0..15`, `vcut=<V>`, `trim=0/1`, `reset=1`, `clear=1`, `save=1` | Mode can change only with the output off; pulse, frequency and duty also with it on (duty is clamped to the range allowed at that frequency) |
 | POST | `/api/log` | `action=start&interval=<s>`, `stop`, `clear` | Start replaces the file and resets Wh/Ah |
 | GET | `/log.csv` | — | CSV download (a snapshot; logging continues) |
 | POST | `/api/wifi` | `ssid`, `pass`, `host` | Saves and restarts |
@@ -82,6 +115,7 @@ A prebuilt image is in `bin/`. Memory use: 420 kB flash, 39 kB of 80 kB RAM.
 | GET/POST | `/update` | firmware `.bin` | OTA, output forced off |
 
 Example: `curl -d "mode=CC" -d "set=2.5" -d "out=1" http://eload.local/api/set`.
+Pulsed: `curl -d "pulse=1" -d "freq=100" -d "duty=20" http://eload.local/api/set`. `/api/status` reports `"pulse":{"on","f","d","dmin","dmax"}`.
 
 ## Development without hardware
 
@@ -98,6 +132,7 @@ Example: `curl -d "mode=CC" -d "set=2.5" -d "out=1" http://eload.local/api/set`.
 | `ina228.*`, `dac8565.*` | drivers |
 | `load.*` | measurement, setpoints, protections, fan |
 | `panel.*`, `logo_xbm.h` | OLED, encoder, buttons, splash logo |
+| `pulse.*` | Pulsed load: timer1 callback writing the DAC over raw HSPI |
 | `logger.*` | RAM history and CSV logging |
 | `web.*`, `webpage.h` | WiFi, HTTP API, OTA; gzipped page generated from `web/index.html` |
 | `settings.*` | persistent settings in LittleFS |

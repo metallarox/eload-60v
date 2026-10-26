@@ -4,6 +4,7 @@
 #include "config.h"
 #include "load.h"
 #include "logo_xbm.h"
+#include "settings.h"
 
 // Pick the controller of your module (default: 2.42" SSD1309; define DISPLAY_SH1106 for the 1.3" boards).
 #ifdef DISPLAY_SH1106
@@ -28,6 +29,15 @@ static bool longDone = false;
 static uint8_t stepIdx = 1;
 static bool ledOn = false;
 static char note[22] = ""; static uint32_t noteUntil = 0;
+
+// Menu: long push opens it, rotate selects, short push edits / confirms, long push closes.
+enum UiState : uint8_t { UI_MAIN, UI_MENU, UI_EDIT };
+enum MenuItem : uint8_t { MI_MODE, MI_PULSE, MI_FREQ, MI_DUTY, MI_EXIT, MI_N };
+static const char *const MENU_LABEL[MI_N] = {"Mode", "Pulse", "Freq", "Duty", "Exit"};
+static UiState ui = UI_MAIN;
+static uint8_t menuSel = 0;
+static bool dirty = false;               // pulse settings changed -> save on leaving the menu
+static uint32_t lastDetent = 0;
 
 static const float STEPS_CC[] = {1.0f, 0.1f, 0.01f, 0.001f};
 static const float STEPS_CP[] = {10.0f, 1.0f, 0.1f};
@@ -76,18 +86,47 @@ void panelSplash(const char *line2) {
 }
 
 // ---- encoder / buttons
+static void editItem(int d, bool fast) {
+    switch (menuSel) {
+        case MI_MODE: loadSetMode((Mode)((load.mode + 3 + d) % 3), 0); stepIdx = 1; break;   // new mode starts from zero
+        case MI_PULSE: loadSetPulse(d > 0); break;
+        case MI_FREQ:
+            loadSetPulseParams(pulseFreqNudge(settings.pulseFreq, d, fast ? 10.0f : 1.0f), settings.pulseDuty);
+            dirty = true; break;
+        case MI_DUTY:
+            loadSetPulseParams(settings.pulseFreq, roundf(settings.pulseDuty) + d * (fast ? 5 : 1));
+            dirty = true; break;
+    }
+}
+
 static void onDetent(int d) {
+    uint32_t now = millis();
+    bool fast = now - lastDetent < 40;                 // spinning quickly -> bigger steps
+    lastDetent = now;
+    if (ui == UI_MENU) { menuSel = (menuSel + MI_N + d) % MI_N; return; }
+    if (ui == UI_EDIT) { editItem(d, fast); return; }
     uint8_t n; const float *st = steps(n);
     if (stepIdx >= n) stepIdx = n - 1;
     loadSetpoint(load.set + d * st[stepIdx]);
 }
 
-static void onShortSw() { uint8_t n; steps(n); stepIdx = (stepIdx + 1) % n; }
+static void leaveMenu() {
+    ui = UI_MAIN;
+    if (dirty) { settingsSave(); dirty = false; }
+}
+
+static void onShortSw() {
+    if (ui == UI_MAIN) { uint8_t n; steps(n); stepIdx = (stepIdx + 1) % n; return; }
+    if (ui == UI_EDIT) { ui = UI_MENU; return; }
+    if (menuSel == MI_EXIT) { leaveMenu(); return; }
+    if (menuSel == MI_MODE && load.out) { flash("OUTPUT IS ON"); return; }
+    if (menuSel == MI_PULSE) { loadSetPulse(!load.pulse); return; }   // a push toggles it directly
+    ui = UI_EDIT;
+}
 
 static void onLongSw() {
-    if (load.out) { flash("OUTPUT IS ON"); return; }
-    loadSetMode((Mode)((load.mode + 1) % 3), 0);   // new mode starts from zero
-    stepIdx = 1;
+    if (ui == UI_MAIN) { ui = UI_MENU; menuSel = 0; return; }
+    leaveMenu();
 }
 
 static void onOut() {
@@ -108,7 +147,7 @@ void panelPoll() {
     encAcc += tbl[(encState << 2) | ab]; encState = ab;
     if (encAcc >= 4) { encAcc -= 4; onDetent(+1); }
     else if (encAcc <= -4) { encAcc += 4; onDetent(-1); }
-    // encoder switch: short = next digit, long (0.7 s) = next mode
+    // encoder switch: short = next digit / menu select, long (0.7 s) = open / close the menu
     bool sw = !(in & B_ENC_SW);
     if (sw && !swDown) { swDown = now; longDone = false; }
     if (sw && swDown && !longDone && now - swDown > 700) { longDone = true; onLongSw(); }
@@ -136,9 +175,57 @@ static void fmtSet(char *buf, size_t n, uint8_t &digitCol) {
     digitCol = col;
 }
 
+static void fmtFreq(char *b, size_t n, float f) {
+    if (f < 1) snprintf(b, n, "%.2fHz", f);
+    else if (f < 10) snprintf(b, n, "%.1fHz", f);
+    else snprintf(b, n, "%.0fHz", f);
+}
+
+static void menuValue(uint8_t i, char *b, size_t n) {
+    static const char *M[] = {"CC", "CP", "CR"};
+    switch (i) {
+        case MI_MODE: snprintf(b, n, "%s", M[load.mode]); break;
+        case MI_PULSE: snprintf(b, n, "%s", load.pulse ? "ON" : "OFF"); break;
+        case MI_FREQ: fmtFreq(b, n, settings.pulseFreq); break;
+        case MI_DUTY: snprintf(b, n, "%.0f%%", settings.pulseDuty); break;
+        default: b[0] = 0;
+    }
+}
+
+static void drawMenu() {
+    oled.setFont(u8g2_font_6x10_tf);
+    oled.drawBox(0, 0, 128, 11);
+    oled.setDrawColor(0);
+    oled.drawStr(2, 9, "MENU");
+    char st[12];
+    snprintf(st, sizeof st, "%s", load.trip != TRIP_NONE ? tripName(load.trip) : (load.out ? "OUT ON" : "OUT OFF"));
+    oled.drawStr(126 - oled.getStrWidth(st), 9, st);
+    oled.setDrawColor(1);
+    if (millis() < noteUntil) { oled.drawStr(4, 36, note); return; }
+    for (uint8_t i = 0; i < MI_N; i++) {
+        int y = 21 + i * 10;
+        bool sel = i == menuSel;
+        if (sel) { oled.drawBox(0, y - 9, 128, 10); oled.setDrawColor(0); }
+        oled.drawStr(4, y, MENU_LABEL[i]);
+        char v[16], vv[20]; menuValue(i, v, sizeof v);
+        if (sel && ui == UI_EDIT) snprintf(vv, sizeof vv, "<%s>", v); else snprintf(vv, sizeof vv, "%s", v);
+        oled.drawStr(124 - oled.getStrWidth(vv), y, vv);
+        oled.setDrawColor(1);
+    }
+}
+
+#ifdef PANEL_HOST_SIM
+uint8_t *simBuffer() { return u8g2_GetBufferPtr(&oled.u); }
+#endif
+
 void panelDraw() {
     setLed(load.out);
     if (!oledOk) return;
+    if (ui != UI_MAIN) {
+        oled.firstPage();
+        do { drawMenu(); panelPoll(); } while (oled.nextPage());
+        return;
+    }
     char l0[24], lc[N_CH][24], l5[24]; uint8_t cur;
     snprintf(l0, sizeof l0, "%5.2fV %6.3fA %4.0fW", load.v, load.iTot, load.pTot);
     for (int c = 0; c < N_CH; c++) snprintf(lc[c], sizeof lc[c], "%d %6.3fA %6.1fW", c + 1, load.i[c], load.p[c]);
@@ -147,12 +234,22 @@ void panelDraw() {
     if (millis() < noteUntil) snprintf(right, sizeof right, "%s", "");
     else if (load.trip != TRIP_NONE) snprintf(right, sizeof right, "%s", tripName(load.trip));
     else snprintf(right, sizeof right, "%s", load.out ? "ON" : "OFF");
+    char pf[10], pd[8];
+    if (load.pulse) { fmtFreq(pf, sizeof pf, settings.pulseFreq); snprintf(pd, sizeof pd, "D%.0f%%", settings.pulseDuty); }
     oled.firstPage();
     do {
         oled.setFont(u8g2_font_6x10_tf);
         oled.drawStr(0, 9, l0);
         oled.drawHLine(0, 11, 128);
         for (int c = 0; c < N_CH; c++) oled.drawStr(0, 21 + c * 10, lc[c]);
+        if (load.pulse) {                              // right column: pulse parameters (small font)
+            oled.setFont(u8g2_font_4x6_tf);
+            oled.drawBox(104, 14, 24, 8); oled.setDrawColor(0); oled.drawStr(106, 20, "PULSE"); oled.setDrawColor(1);
+            oled.drawStr(128 - oled.getStrWidth(pf), 31, pf);
+            oled.drawStr(128 - oled.getStrWidth(pd), 41, pd);
+            oled.drawStr(112, 51, "AVG");
+            oled.setFont(u8g2_font_6x10_tf);
+        }
         oled.drawHLine(0, 53, 128);
         if (millis() < noteUntil) oled.drawStr(0, 63, note);
         else {

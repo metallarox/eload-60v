@@ -13,6 +13,8 @@ struct Settings {
     uint8_t mask = 0x0F;                 // enabled channels
     float vCutoff = 0;                   // V, 0 = disabled (battery test end voltage)
     uint16_t logInterval = 1;            // s
+    float pulseFreq = 10.0f;             // Hz, pulsed load
+    float pulseDuty = 50.0f;             // %
 };
 extern Settings settings;
 bool settingsLoad();

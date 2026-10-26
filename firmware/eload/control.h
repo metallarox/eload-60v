@@ -77,3 +77,37 @@ static inline float trimGain(float gain, float setA, float measA) {
     float g = gain * (1 + 0.05f * err);
     return clampf(g, 0.95f, 1.05f);
 }
+
+// ---- pulsed load timing
+static inline float pulseClampFreq(float f) { return clampf(f, PULSE_F_MIN, PULSE_F_MAX); }
+
+// Duty (%) allowed at frequency f: 1..99 %, narrowed so both phases last at least PULSE_T_MIN_US.
+static inline float pulseClampDuty(float f, float duty) {
+    f = pulseClampFreq(f);
+    float dmin = PULSE_T_MIN_US * 1e-6f * f * 100.0f;
+    float lo = dmin > PULSE_D_MIN ? dmin : PULSE_D_MIN;
+    float hi = 100.0f - lo;
+    if (hi > PULSE_D_MAX) hi = PULSE_D_MAX;
+    return clampf(duty, lo, hi);
+}
+
+// High and low phase durations in microseconds.
+static inline void pulseTimes(float f, float duty, uint32_t &hiUs, uint32_t &loUs) {
+    f = pulseClampFreq(f);
+    duty = pulseClampDuty(f, duty);
+    double period = 1e6 / f;
+    hiUs = (uint32_t)llround(period * duty / 100.0);
+    loUs = (uint32_t)llround(period) - hiUs;
+}
+
+// Encoder step for the frequency: two significant digits (100 -> 110, 99 -> 100, 1.0 -> 1.1).
+static inline float pulseFreqStep(float f, int dir) {
+    float ref = dir < 0 ? f * 0.9999f : f;
+    return powf(10.0f, floorf(log10f(ref)) - 1.0f);
+}
+static inline float pulseFreqNudge(float f, int dir, float mult) {
+    float st = pulseFreqStep(f, dir) * mult;
+    float n = f + dir * st;
+    n = roundf(n / st) * st;                          // stay on the grid of the step
+    return pulseClampFreq(n);
+}

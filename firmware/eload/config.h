@@ -2,7 +2,7 @@
 #pragma once
 #include <stdint.h>
 
-#define FW_VERSION "0.1.0"
+#define FW_VERSION "0.2.0"
 #define FW_NAME    "eload-60v"
 
 // ---------------------------------------------------------------- pins (ESP8266 GPIO numbers)
@@ -52,6 +52,15 @@ static const uint8_t INA_ADDR[4] = {0x40, 0x41, 0x42, 0x43};
 #define FAN_T_LOW     35.0f       // C -> minimum fan speed
 #define FAN_T_HIGH    65.0f       // C -> full speed
 #define FAN_MIN_DUTY  0.25f
+
+// ---------------------------------------------------------------- pulsed (modulated) load
+// The sink alternates between the setpoint (high phase) and the keep-alive current (low phase).
+// The CC loop needs ~30-50 us per edge (10-90 %), so each phase lasts at least PULSE_T_MIN_US.
+#define PULSE_F_MIN     0.1f      // Hz
+#define PULSE_F_MAX     1000.0f   // Hz
+#define PULSE_D_MIN     1.0f      // % duty (time at the setpoint)
+#define PULSE_D_MAX     99.0f     // %
+#define PULSE_T_MIN_US  100.0f    // us, shortest high or low phase
 
 // ---------------------------------------------------------------- timing
 #define CONTROL_PERIOD_MS  50

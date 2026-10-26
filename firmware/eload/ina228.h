@@ -27,6 +27,7 @@ public:
     float dieTemp();        // C
     uint16_t readDiag();    // reading also clears latched flags and releases ALERT
     void resetAccumulators();
+    void setAdcConfig(uint16_t v) { write16(ADC_CONFIG, v); }
 
 private:
     uint8_t _addr; bool _ok = false; float _currentLsb = 0, _rShunt = 0.02f; uint16_t _cfg = 0;

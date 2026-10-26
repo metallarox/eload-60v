@@ -13,6 +13,11 @@ public:
     void write(uint8_t ch, uint16_t code);     // write and update one channel
     void allZero() { for (uint8_t c = 0; c < 4; c++) write(c, 0); }
     uint16_t last(uint8_t ch) const { return _last[ch & 3]; }
+    void prepareSpi();                         // leaves the HSPI configured for the DAC (used by the pulse ISR)
+    // 24-bit frame packed for SPI1W0 (first byte in bits 0..7): write and update channel ch.
+    static uint32_t rawWord(uint8_t ch, uint16_t code) {
+        return (uint32_t)(0x10 | ((ch & 3) << 1)) | ((uint32_t)(code >> 8) << 8) | ((uint32_t)(code & 0xFF) << 16);
+    }
 private:
     uint8_t _sync; uint16_t _last[4] = {0, 0, 0, 0};
     void frame(uint8_t ctrl, uint16_t data);

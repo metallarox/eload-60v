@@ -22,3 +22,5 @@ void DAC8565::write(uint8_t ch, uint16_t code) {
     ch &= 3; _last[ch] = code;
     frame(0x10 | (ch << 1), code);
 }
+
+void DAC8565::prepareSpi() { SPI.beginTransaction(DAC_SPI); SPI.endTransaction(); }   // registers keep mode 1 / 10 MHz

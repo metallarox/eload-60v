@@ -12,3 +12,5 @@ __pycache__/
 # firmware build
 build/
 *.o
+test/panel_sim/panel_sim
+test/panel_sim/*.pbm

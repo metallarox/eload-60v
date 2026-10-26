@@ -4,6 +4,7 @@
 #include "control.h"
 
 static int fails = 0, checks = 0;
+#define CHECK(c) do { checks++; if (!(c)) { std::printf("FAIL %s:%d  %s\n", __FILE__, __LINE__, #c); fails++; } } while (0)
 #define NEAR(a, b, tol) do { checks++; double _a = (a), _b = (b); if (std::fabs(_a - _b) > (tol)) { \
     std::printf("FAIL %s:%d  %s = %.6f, expected %.6f\n", __FILE__, __LINE__, #a, _a, _b); fails++; } } while (0)
 
@@ -55,6 +56,22 @@ int main() {
     NEAR(trimGain(1.0f, 2.0f, 1.0f), 1.0, 1e-6);           // 50 % error = transient, ignored
     for (int k = 0; k < 2000; k++) g = trimGain(g, 2.0f, 1.99f);
     NEAR(g <= 1.05f, 1, 0);
+    // pulsed load timing
+    { uint32_t h, l;
+      pulseTimes(100, 50, h, l); CHECK(h == 5000 && l == 5000);
+      pulseTimes(1000, 50, h, l); CHECK(h == 500 && l == 500);
+      pulseTimes(1000, 5, h, l); CHECK(h == 100 && l == 900);          // narrowed to 10 % at 1 kHz
+      pulseTimes(1000, 99, h, l); CHECK(h == 900 && l == 100);
+      pulseTimes(5000, 50, h, l); CHECK(h + l == 1000);                 // clamped to 1 kHz
+      pulseTimes(0.01f, 25, h, l); CHECK(h == 2500000 && l == 7500000);  // clamped to 0.1 Hz
+      pulseTimes(10, 0.2f, h, l); CHECK(h == 1000);                     // 1 % minimum
+      NEAR(pulseClampDuty(1000, 0), 10, 1e-3); NEAR(pulseClampDuty(1000, 100), 90, 1e-3);
+      NEAR(pulseClampDuty(1, 100), 99, 1e-3); NEAR(pulseClampDuty(200, 1), 2, 1e-3);
+      NEAR(pulseFreqNudge(100, 1, 1), 110, 1e-3); NEAR(pulseFreqNudge(100, -1, 1), 99, 1e-3);
+      NEAR(pulseFreqNudge(1, -1, 1), 0.99f, 1e-3); NEAR(pulseFreqNudge(9.9f, 1, 1), 10, 1e-3);
+      NEAR(pulseFreqNudge(0.1f, -1, 1), 0.1f, 1e-3); NEAR(pulseFreqNudge(990, 1, 1), 1000, 1e-3);
+      NEAR(pulseFreqNudge(1000, 1, 1), 1000, 1e-3); NEAR(pulseFreqNudge(120, 1, 10), 200, 1e-3);
+    }
     std::printf("%d checks, %d failures\n", checks, fails);
     return fails ? 1 : 0;
 }
