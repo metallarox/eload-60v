@@ -1,4 +1,4 @@
-ERC report (2026-10-26T09:22:20, Encoding UTF8)
+ERC report (2026-10-26T09:44:42, Encoding UTF8)
 Report includes: Errors, Warnings, Exclusions
 
 ***** Sheet /
@@ -30,13 +30,13 @@ Report includes: Errors, Warnings, Exclusions
     ; warning
     @(281.94 mm, 128.27 mm): Symbol U6 [OPA2196xD]
 
-***** Sheet /Ingresso e protezioni/
+***** Sheet /Input and protection/
 
-***** Sheet /Canali di potenza/
+***** Sheet /Power channels/
 
-***** Sheet /Controllo/
+***** Sheet /Control/
 
-***** Sheet /Alimentazione/
+***** Sheet /Power supplies/
 
  ** ERC messages: 9  Errors 0  Warnings 9
 

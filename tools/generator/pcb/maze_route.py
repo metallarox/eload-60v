@@ -3,7 +3,7 @@ import pcbnew, heapq, math, sys
 sys.path.insert(0, '/home/claude/py311')
 import numpy as np
 
-PCB = '/home/claude/out/carico_attivo/carico_attivo.kicad_pcb'
+PCB = '/home/claude/out/eload_4ch/eload_4ch.kicad_pcb'
 G = 0.1                      # passo griglia mm
 TW, CL, VD = 0.2, 0.21, 0.7  # pista, distanza, diametro via
 OX, OY, W, H = 50.0, 40.0, 170.0, 125.0

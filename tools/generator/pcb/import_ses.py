@@ -3,7 +3,7 @@ import pcbnew, re, sys
 sys.path.insert(0, '/home/claude/gen')
 from sexp import parse, find, find1, uq
 
-PCB = '/home/claude/out/carico_attivo/carico_attivo.kicad_pcb'
+PCB = '/home/claude/out/eload_4ch/eload_4ch.kicad_pcb'
 ses = parse(open([x for x in sys.argv[1:] if not x.startswith('--')][0]).read())[0]
 routes = find1(ses, 'routes')
 res = find1(routes, 'resolution')

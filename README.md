@@ -65,7 +65,7 @@ analysis/         loop model (sympy/scipy), large-signal sim, SOA/thermal plots
 tools/generator/  Python scripts that generated the schematic and placed/routed the PCB
 ```
 
-Schematic annotations and BOM notes are in Italian; this README and the slides are in English.
+Schematic, PCB and the KiCad BOM are in English. The priced BOM workbook (`eload_4ch_bom_priced.xlsx`) and the code comments in `tools/` are still in Italian.
 
 ## Building one
 
@@ -101,7 +101,7 @@ Schematic annotations and BOM notes are in Italian; this README and the slides a
 
 ## Changelog
 
-- **rev 0.3** — front panel: PCF8574 expander, 10-pin IDC connector, debounce, I²C pull-ups 2.2 kΩ.
+- **rev 0.3** — front panel: PCF8574 expander, 10-pin IDC connector, debounce, I²C pull-ups 2.2 kΩ. Schematic and PCB translated to English (sheets: input, channels, control, power).
 - **rev 0.2** — loop compensation C6 = 1 nF, setpoint filter C5 = 10 nF (10× bandwidth, PM ≈ 80°); WiFi control with D1 mini Pro replaces STM32 + isolated USB.
 
 ## Credits

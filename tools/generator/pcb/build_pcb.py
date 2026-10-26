@@ -1,10 +1,10 @@
-"""Costruisce carico_attivo.kicad_pcb: piazzamento completo + potenza e Kelvin tracciati."""
+"""Builds eload_4ch.kicad_pcb: piazzamento completo + potenza e Kelvin tracciati."""
 import sys, os, json, math
 sys.path.insert(0, '/home/claude/gen')
 import pcbnew
 from sexp import parse, find, find1, uq
 
-PRJ = '/home/claude/out/carico_attivo'
+PRJ = '/home/claude/out/eload_4ch'
 FPDIR = '/home/claude/kicad10/squashfs-root/usr/share/kicad/footprints'
 OX, OY = 50.0, 40.0          # origine scheda nel foglio
 W, H = 170.0, 125.0
@@ -20,7 +20,7 @@ def mm(v):
 
 
 # ------------------------------------------------------------------ netlist
-net = parse(open(os.path.join(PRJ, 'carico_attivo.net')).read())[0]
+net = parse(open(os.path.join(PRJ, 'eload_4ch.net')).read())[0]
 comps = {}
 for c in find(find1(net, 'components'), 'comp'):
     ref = uq(find1(c, 'ref')[1])
@@ -38,7 +38,7 @@ for n in find(find1(net, 'nets'), 'net'):
     for nd in find(n, 'node'):
         pinnet[(uq(find1(nd, 'ref')[1]), uq(find1(nd, 'pin')[1]))] = name
 
-board = pcbnew.NewBoard(os.path.join(PRJ, 'carico_attivo.kicad_pcb'))
+board = pcbnew.NewBoard(os.path.join(PRJ, 'eload_4ch.kicad_pcb'))
 ds = board.GetDesignSettings()
 ds.SetCopperLayerCount(2)
 nets = {}
@@ -408,15 +408,15 @@ def text(layer, s, x, y, size=1.5, mirror=False):
 rect(pcbnew.Edge_Cuts, 0, 0, W, H, 0.15)
 rect(pcbnew.Dwgs_User, 22, 27, 102, 97, 0.2)             # spreader rame 80x70
 rect(pcbnew.Cmts_User, 27, 22, 97, 102, 0.2)             # base cooler SP3/TR4 (indicativa)
-text(pcbnew.Dwgs_User, 'SPREADER Cu 80x70x6 (potenziale VLOAD) - isolare dal cooler', 62, 99, 1.2)
-text(pcbnew.Cmts_User, 'Base cooler SP3/TR4 sotto lo spreader', 62, 104, 1.2)
+text(pcbnew.Dwgs_User, 'Cu SPREADER 80x70x6 (at VLOAD potential) - insulate from the cooler', 62, 99, 1.2)
+text(pcbnew.Cmts_User, 'SP3/TR4 cooler base under the spreader', 62, 104, 1.2)
 text(pcbnew.F_SilkS, 'DUT+', 9, 20, 2.0)
 text(pcbnew.F_SilkS, 'DUT-', 9, 105, 2.0)
 text(pcbnew.F_SilkS, 'SENSE +/-', 8.5, 53.5, 1.2)
 text(pcbnew.F_SilkS, '12V AUX', 160, 99, 1.2)
 text(pcbnew.F_SilkS, 'FRONT PANEL', 115, 3.2, 1.1)
 rect(pcbnew.F_Fab, 147.5, 8.1, 169.9, 33.8, 0.12)
-text(pcbnew.Cmts_User, 'Antenna Wemos oltre il bordo: niente rame per x > 164 mm', 150, 37.5, 0.8)
+text(pcbnew.Cmts_User, 'Wemos antenna beyond the board edge: no copper for x > 164 mm', 150, 37.5, 0.8)
 text(pcbnew.F_SilkS, 'WEMOS D1 mini Pro  (antenna ->)', 156, 21.0, 1.0)
 text(pcbnew.F_SilkS, 'FAN', 167, 80, 1.2)
 text(pcbnew.F_SilkS, 'NTC', 167, 90, 1.2)
@@ -636,6 +636,6 @@ for p in list(board.GetPads()):
         failed.append(fp.GetReference() + '.' + p.GetNumber())
 print('vias GND aggiunte', added, 'non piazzate', failed)
 
-board.Save(os.path.join(PRJ, 'carico_attivo.kicad_pcb'))
+board.Save(os.path.join(PRJ, 'eload_4ch.kicad_pcb'))
 json.dump({k: list(v) for k, v in {}.items()}, open('/tmp/pcb_state.json', 'w'))
 print('salvato')

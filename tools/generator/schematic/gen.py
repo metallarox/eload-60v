@@ -4,7 +4,7 @@ from sexp import q, uq, find, find1, dump
 from lib import get_symbol, pins as sym_pins, prop, n_units
 
 G = 1.27
-PROJECT = 'carico_attivo'
+PROJECT = 'eload_4ch'
 POWER_NETS = {'GND': 'power:GND', 'GND1': 'power:GND1', '+12V': 'power:+12V', '+5V': 'power:+5V',
               '+3V3': 'power:+3V3', 'VBUS': 'power:VBUS'}
 
@@ -341,7 +341,7 @@ def build(design, outdir, title, rev, date, notes):
             cnt[n] = cnt.get(n, 0) + 1
     singles = [n for n, c in cnt.items() if c == 1 and n not in POWER_NETS]
     if singles:
-        print('ATTENZIONE reti con un solo componente:', singles)
+        print('WARNING single-pin nets:', singles)
 
     sheet_entries = []
     for i, (file, stitle, desc) in enumerate(design.sheets):
@@ -410,7 +410,7 @@ def build(design, outdir, title, rev, date, notes):
         ty += 5.08 if not line.startswith('#') else 7
     txt = ('(kicad_sch (version 20230121) (generator eeschema)\n(uuid %s)\n(paper "A3")\n%s\n(lib_symbols)\n%s\n'
            '(sheet_instances (path "/" (page "1")))\n)\n') % (
-        root, title_block(title, 'Indice', rev, date, ['Schema gerarchico: un foglio per blocco funzionale']), '\n'.join(items))
+        root, title_block(title, 'Index', rev, date, ['Hierarchical schematic: one sheet per functional block']), '\n'.join(items))
     open(os.path.join(outdir, PROJECT + '.kicad_sch'), 'w').write(txt)
     pro = {"meta": {"filename": PROJECT + ".kicad_pro", "version": 1},
            "sheets": [[root, "Root"]] + [[su, t] for su, _, t, _ in sheet_entries],

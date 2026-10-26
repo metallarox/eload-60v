@@ -1,10 +1,7 @@
 (version 1)
-(rule "Alta tensione (60 V, IPC-2221 B2 esterno)"
+(rule "High voltage (60 V, IPC-2221 B2 external)"
   (condition "A.NetName == 'VLOAD' || A.NetName == 'Net-(J1-Pin_1)' || A.NetName == 'Net-(J3-Pin_1)'")
   (constraint clearance (min 0.6mm)))
-(rule "Isolamento USB GND1 / GND"
-  (condition "A.NetName == 'GND1' && B.NetName == 'GND'")
-  (constraint clearance (min 2.5mm)))
-(rule "Pad a passo fine nello stesso package (MSOP-10 INA228)"
+(rule "Fine-pitch pads inside one package (INA228 MSOP-10)"
   (condition "(A.memberOfFootprint('U4') && B.memberOfFootprint('U4')) || (A.memberOfFootprint('U5') && B.memberOfFootprint('U5')) || (A.memberOfFootprint('U7') && B.memberOfFootprint('U7')) || (A.memberOfFootprint('U8') && B.memberOfFootprint('U8'))")
   (constraint clearance (min 0.14mm)))

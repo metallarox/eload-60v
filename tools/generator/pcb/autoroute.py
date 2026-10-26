@@ -3,7 +3,7 @@ import pcbnew, re, subprocess, sys, os, math
 sys.path.insert(0, '/home/claude/gen')
 from sexp import parse, find, find1, uq
 
-PCB = '/home/claude/out/carico_attivo/carico_attivo.kicad_pcb'
+PCB = '/home/claude/out/eload_4ch/eload_4ch.kicad_pcb'
 SKIP = {'GND', 'GND1', 'VLOAD', 'Net-(J1-Pin_1)'}
 b = pcbnew.LoadBoard(PCB)
 import os as _os

@@ -2,129 +2,17 @@
 	(version 20260306)
 	(generator "eeschema")
 	(generator_version "10.0")
-	(uuid "28bb9797-67af-4466-82ad-11ee221e49cb")
+	(uuid "591cad4a-5508-4909-9aa0-e526f481f700")
 	(paper "A3")
 	(title_block
-		(title "Carico attivo 60V 20A 300W — Indice")
+		(title "Electronic Load 4ch 60V 20A 300W — Index")
 		(date "2026-10-25")
 		(rev "0.3")
 		(company "IV3HGA")
-		(comment 1 "Schema gerarchico: un foglio per blocco funzionale")
+		(comment 1 "Hierarchical schematic: one sheet per functional block")
 	)
 	(lib_symbols)
-	(text "GND unica = DUT- (stella sul prigioniero J2). Controllo solo via WiFi; USB del Wemos NON isolato: usarlo solo per programmare a DUT scollegato."
-		(exclude_from_sim no)
-		(at 30 212.32 0)
-		(effects
-			(font
-				(size 1.524 1.524)
-			)
-			(justify left bottom)
-		)
-		(uuid "29daf3fd-1206-4659-9b88-6d8e47229af6")
-	)
-	(text "Da verificare prima del layout"
-		(exclude_from_sim no)
-		(at 30 244.72 0)
-		(effects
-			(font
-				(size 1.524 1.524)
-				(bold yes)
-			)
-			(justify left bottom)
-		)
-		(uuid "2cc28189-e1d9-4b3f-9b2b-be8f6b4b0bba")
-	)
-	(text "Pannello (rev 0.3): PCF8574 @0x20 (encoder A/B/SW, tasto OUTPUT, LED), INT su GPIO0; OLED @0x3C sullo stesso bus. OUTPUT ON abilita ARM, mai automatico."
-		(exclude_from_sim no)
-		(at 30 222.48 0)
-		(effects
-			(font
-				(size 1.524 1.524)
-			)
-			(justify left bottom)
-		)
-		(uuid "2d60906e-b1d4-4e2e-ade0-12a31a5ff91f")
-	)
-	(text "MOSFET di potenza TO-247 (montati sullo spreader), shunt WSK2512 Kelvin, diodo inversione D2PAK, TVS SMC/SMA,"
-		(exclude_from_sim no)
-		(at 30 234.56 0)
-		(effects
-			(font
-				(size 1.524 1.524)
-			)
-			(justify left bottom)
-		)
-		(uuid "3332cf00-5e52-4c72-8064-666de69b882b")
-	)
-	(text "INA228 in VSSOP-10 (passo 0,5 mm), DAC8565 in TSSOP-16, AP63205 in TSOT-23-6, induttore SRN4018, connettori THT."
-		(exclude_from_sim no)
-		(at 30 239.64 0)
-		(effects
-			(font
-				(size 1.524 1.524)
-			)
-			(justify left bottom)
-		)
-		(uuid "3ecf6571-a806-4906-85f5-c0efd94d9ac2")
-	)
-	(text "Setpoint: DAC8565 0-2,5 V -> partitore 25:1 -> 0-100 mV su shunt 20 mOhm = 0-5 A. Il partitore e riferito al Kelvin freddo dello shunt (SHNx)."
-		(exclude_from_sim no)
-		(at 30 197.08 0)
-		(effects
-			(font
-				(size 1.524 1.524)
-			)
-			(justify left bottom)
-		)
-		(uuid "4b300082-a96d-4c97-b2a8-95793f9c1961")
-	)
-	(text "ARM basso -> CLAMP alto -> i FET di clamp cortocircuitano VSET1..4 a massa. MCU in reset = carico spento."
-		(exclude_from_sim no)
-		(at 30 207.24 0)
-		(effects
-			(font
-				(size 1.524 1.524)
-			)
-			(justify left bottom)
-		)
-		(uuid "4c9110c4-0ba7-4dc9-9242-ae666c887c60")
-	)
-	(text "Firmware ESP8266: dopo SPI.begin() riassegnare GPIO12 come uscita (ARM_DRV); GPIO16 = ARM_FB; A0 = NTC1 (partitore interno 220k/100k del D1 mini)."
-		(exclude_from_sim no)
-		(at 30 217.4 0)
-		(effects
-			(font
-				(size 1.524 1.524)
-			)
-			(justify left bottom)
-		)
-		(uuid "5e941c31-7112-4756-a835-f91bdde426ec")
-	)
-	(text "Carico elettronico 4 canali - 60 V / 20 A / 300 W"
-		(exclude_from_sim no)
-		(at 30 185 0)
-		(effects
-			(font
-				(size 1.524 1.524)
-				(bold yes)
-			)
-			(justify left bottom)
-		)
-		(uuid "7271fa2d-4207-47bf-ab7b-e5b51c797ab4")
-	)
-	(text "Antenna del Wemos fuori dal bordo e lontana dal cooler (o antenna esterna su U.FL), stabilita del loop CC verificata in analisi (C 1n C0G / R 1k / Rg 100R, rev 0.2), da confermare al banco, I2t di D1 contro F1, FBSOA IXTH75N10L2 a 60 V e Tc 90 C."
-		(exclude_from_sim no)
-		(at 30 251.72 0)
-		(effects
-			(font
-				(size 1.524 1.524)
-			)
-			(justify left bottom)
-		)
-		(uuid "8c08d305-1942-4e7e-a9ce-50d5b48935c4")
-	)
-	(text "Eccezioni alla regola SMD SOIC/SOP + passivi 1206"
+	(text "Exceptions to the SMD SOIC/SOP + 1206 passives rule"
 		(exclude_from_sim no)
 		(at 30 227.56 0)
 		(effects
@@ -134,9 +22,54 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "bfd68e77-0b14-4f30-bb60-196a31da21f6")
+		(uuid "020ed0d2-7ac4-417e-a41e-c689c7e67e1c")
 	)
-	(text "ARM (attivo alto, pull-down 10k) abilita il carico. LM393 (OVP 64,7 V, OTP ~100 C) e ALERT degli INA228 lo tirano basso in hardware."
+	(text "INA228 in VSSOP-10 (0.5 mm pitch), DAC8565 in TSSOP-16, AP63205 in TSOT-23-6, SRN4018 inductor, THT connectors."
+		(exclude_from_sim no)
+		(at 30 239.64 0)
+		(effects
+			(font
+				(size 1.524 1.524)
+			)
+			(justify left bottom)
+		)
+		(uuid "04bd6161-bb82-4a39-bbc7-2b24b3842536")
+	)
+	(text "4-channel electronic load - 60 V / 20 A / 300 W"
+		(exclude_from_sim no)
+		(at 30 185 0)
+		(effects
+			(font
+				(size 1.524 1.524)
+				(bold yes)
+			)
+			(justify left bottom)
+		)
+		(uuid "255b3af1-429c-4aac-a135-6496eceece9c")
+	)
+	(text "Setpoint: DAC8565 0-2.5 V -> 25:1 divider -> 0-100 mV on 20 mOhm shunt = 0-5 A. The divider is referenced to the cold Kelvin pad of the shunt (SHNx)."
+		(exclude_from_sim no)
+		(at 30 197.08 0)
+		(effects
+			(font
+				(size 1.524 1.524)
+			)
+			(justify left bottom)
+		)
+		(uuid "361dd590-7daa-44e5-94d8-730ddec26f0f")
+	)
+	(text "Wemos antenna off the board edge and away from the cooler (or external antenna on U.FL); CC loop stability analysed (C 1n C0G / R 1k / Rg 100R, rev 0.2), to confirm on the bench; D1 I2t vs F1; IXTH75N10L2 FBSOA at 60 V and Tc 90 C."
+		(exclude_from_sim no)
+		(at 30 251.72 0)
+		(effects
+			(font
+				(size 1.524 1.524)
+			)
+			(justify left bottom)
+		)
+		(uuid "43d229eb-5932-4ac7-afe3-e8e7c9d81b48")
+	)
+	(text "ARM (active high, 10k pull-down) enables the load. LM393 (OVP 64.7 V, OTP ~100 C) and the INA228 ALERTs pull it low in hardware."
 		(exclude_from_sim no)
 		(at 30 202.16 0)
 		(effects
@@ -145,9 +78,9 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "d0788275-cba0-49f3-8b30-db5cbda667ce")
+		(uuid "4542240b-3cac-4d37-8662-c30ccea608e8")
 	)
-	(text "Ogni canale: 0-5 A, max 75 W per MOSFET. Sopra 15 V il limite e la potenza (300 W / V), gestito da firmware + ALERT INA228."
+	(text "Each channel: 0-5 A, max 75 W per MOSFET. Above 15 V the limit is power (300 W / V), enforced by firmware + INA228 ALERT."
 		(exclude_from_sim no)
 		(at 30 192 0)
 		(effects
@@ -156,7 +89,74 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "d6ff13c1-b76e-4a64-8184-462e97d57f1d")
+		(uuid "506763cc-0db0-4913-80b2-89a8fb5f6300")
+	)
+	(text "ARM low -> CLAMP high -> clamp FETs short VSET1..4 to ground. MCU in reset = load off."
+		(exclude_from_sim no)
+		(at 30 207.24 0)
+		(effects
+			(font
+				(size 1.524 1.524)
+			)
+			(justify left bottom)
+		)
+		(uuid "53560d1b-9e71-44df-810e-2cf417b549ca")
+	)
+	(text "ESP8266 firmware: after SPI.begin() re-assign GPIO12 as output (ARM_DRV); GPIO16 = ARM_FB; A0 = NTC1 (D1 mini internal 220k/100k divider)."
+		(exclude_from_sim no)
+		(at 30 217.4 0)
+		(effects
+			(font
+				(size 1.524 1.524)
+			)
+			(justify left bottom)
+		)
+		(uuid "6d373833-a872-475f-bc83-abf325765881")
+	)
+	(text "Front panel (rev 0.3): PCF8574 @0x20 (encoder A/B/SW, OUTPUT button, LED), INT on GPIO0; OLED @0x3C on the same bus. OUTPUT ON enables ARM, never automatic."
+		(exclude_from_sim no)
+		(at 30 222.48 0)
+		(effects
+			(font
+				(size 1.524 1.524)
+			)
+			(justify left bottom)
+		)
+		(uuid "869048e0-f9f4-47b6-acc6-dcfc35c84946")
+	)
+	(text "To verify on the bench"
+		(exclude_from_sim no)
+		(at 30 244.72 0)
+		(effects
+			(font
+				(size 1.524 1.524)
+				(bold yes)
+			)
+			(justify left bottom)
+		)
+		(uuid "8c22f97c-4303-471e-a235-211a955c361d")
+	)
+	(text "TO-247 power MOSFETs (mounted on the spreader), WSK2512 Kelvin shunts, D2PAK reverse-polarity diode, SMC/SMA TVS,"
+		(exclude_from_sim no)
+		(at 30 234.56 0)
+		(effects
+			(font
+				(size 1.524 1.524)
+			)
+			(justify left bottom)
+		)
+		(uuid "b08f6b60-e977-4ba0-b183-5104663a919f")
+	)
+	(text "Single GND = DUT- (star point at stud J2). Control over WiFi only; the Wemos USB is NOT isolated: use it only for programming with the DUT disconnected."
+		(exclude_from_sim no)
+		(at 30 212.32 0)
+		(effects
+			(font
+				(size 1.524 1.524)
+			)
+			(justify left bottom)
+		)
+		(uuid "d37536b4-209e-4b91-98b7-78cb6f21bbc0")
 	)
 	(sheet
 		(at 270 50)
@@ -173,8 +173,8 @@
 		(fill
 			(color 0 0 0 0)
 		)
-		(uuid "22994e92-e607-4af3-bf30-f9d809d7bc8c")
-		(property "Sheetname" "Controllo"
+		(uuid "07479a42-e203-4517-9666-2602ef94995a")
+		(property "Sheetname" "Control"
 			(at 270 49.3 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -185,7 +185,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Sheetfile" "controllo.kicad_sch"
+		(property "Sheetfile" "control.kicad_sch"
 			(at 270 85.6 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -198,100 +198,8 @@
 		)
 		(instances
 			(project "eload_4ch"
-				(path "/28bb9797-67af-4466-82ad-11ee221e49cb"
+				(path "/591cad4a-5508-4909-9aa0-e526f481f700"
 					(page "4")
-				)
-			)
-		)
-	)
-	(sheet
-		(at 150 50)
-		(size 90 35)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(stroke
-			(width 0.1524)
-			(type solid)
-		)
-		(fill
-			(color 0 0 0 0)
-		)
-		(uuid "35b3d675-d876-4869-8f30-640adb004eae")
-		(property "Sheetname" "Canali di potenza"
-			(at 150 49.3 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.524 1.524)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Sheetfile" "canali.kicad_sch"
-			(at 150 85.6 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left top)
-			)
-		)
-		(instances
-			(project "eload_4ch"
-				(path "/28bb9797-67af-4466-82ad-11ee221e49cb"
-					(page "3")
-				)
-			)
-		)
-	)
-	(sheet
-		(at 30 110)
-		(size 90 35)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(stroke
-			(width 0.1524)
-			(type solid)
-		)
-		(fill
-			(color 0 0 0 0)
-		)
-		(uuid "702be8c1-3d8a-405b-9fe6-e5848e86434c")
-		(property "Sheetname" "Alimentazione"
-			(at 30 109.3 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.524 1.524)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Sheetfile" "alimentazione.kicad_sch"
-			(at 30 145.6 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left top)
-			)
-		)
-		(instances
-			(project "eload_4ch"
-				(path "/28bb9797-67af-4466-82ad-11ee221e49cb"
-					(page "5")
 				)
 			)
 		)
@@ -311,8 +219,8 @@
 		(fill
 			(color 0 0 0 0)
 		)
-		(uuid "eb5d345a-aeb0-45eb-bbbe-c67a509cdafe")
-		(property "Sheetname" "Ingresso e protezioni"
+		(uuid "0fc438b2-f782-4805-98e0-58bb46ca25b7")
+		(property "Sheetname" "Input and protection"
 			(at 30 49.3 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -323,7 +231,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Sheetfile" "ingresso.kicad_sch"
+		(property "Sheetfile" "input.kicad_sch"
 			(at 30 85.6 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -336,8 +244,100 @@
 		)
 		(instances
 			(project "eload_4ch"
-				(path "/28bb9797-67af-4466-82ad-11ee221e49cb"
+				(path "/591cad4a-5508-4909-9aa0-e526f481f700"
 					(page "2")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 30 110)
+		(size 90 35)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "90fffe34-5d12-4b0e-8000-f35aaf2e12cf")
+		(property "Sheetname" "Power supplies"
+			(at 30 109.3 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.524 1.524)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "power.kicad_sch"
+			(at 30 145.6 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "eload_4ch"
+				(path "/591cad4a-5508-4909-9aa0-e526f481f700"
+					(page "5")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 150 50)
+		(size 90 35)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "b7931f98-cec3-440a-8c5f-fcb18fc829f9")
+		(property "Sheetname" "Power channels"
+			(at 150 49.3 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.524 1.524)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "channels.kicad_sch"
+			(at 150 85.6 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "eload_4ch"
+				(path "/591cad4a-5508-4909-9aa0-e526f481f700"
+					(page "3")
 				)
 			)
 		)

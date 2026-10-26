@@ -2,7 +2,7 @@
 set -e
 R=/home/claude/kicad10/squashfs-root
 export KICAD10_SYMBOL_DIR=$R/usr/share/kicad/symbols KICAD10_FOOTPRINT_DIR=$R/usr/share/kicad/footprints
-P=/home/claude/out/carico_attivo/carico_attivo.kicad_pcb
+P=/home/claude/out/eload_4ch/eload_4ch.kicad_pcb
 cd /home/claude/pcb10
 $R/AppRun python3.11 build_pcb.py 2>&1 | grep -v assert | tail -1
 $R/AppRun kicad-cli pcb drc --refill-zones --save-board -o /tmp/drc_pre.rpt $P >/dev/null 2>&1

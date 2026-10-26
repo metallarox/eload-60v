@@ -324,24 +324,24 @@
   },
   "sheets": [
     [
-      "080fc2a0-5c73-4662-b3f0-aee6c7395b8d",
+      "591cad4a-5508-4909-9aa0-e526f481f700",
       "Root"
     ],
     [
-      "c1be31c4-7a9b-4618-b22b-153d2e7fcdbb",
-      "Ingresso e protezioni"
+      "0fc438b2-f782-4805-98e0-58bb46ca25b7",
+      "Input and protection"
     ],
     [
-      "83307145-2fc5-4d02-bb09-bad3a0198161",
-      "Canali di potenza"
+      "b7931f98-cec3-440a-8c5f-fcb18fc829f9",
+      "Power channels"
     ],
     [
-      "c5d27a20-a8dc-4900-9a86-f2fdf7735dc0",
-      "Controllo"
+      "07479a42-e203-4517-9666-2602ef94995a",
+      "Control"
     ],
     [
-      "f2b6687c-2049-4446-936c-bf897c3a32a4",
-      "Alimentazione"
+      "90fffe34-5d12-4b0e-8000-f35aaf2e12cf",
+      "Power supplies"
     ]
   ],
   "text_variables": {},
