@@ -11,6 +11,7 @@ rm -f /tmp/out.ses
 xvfb-run -a java -jar /home/claude/freerouting.jar -de /tmp/in2.dsn -do /tmp/out.ses -mp ${PASSES:-25} > /tmp/ar.log 2>&1 || true
 $R/AppRun python3.11 import_ses.py /tmp/out.ses 2>&1 | grep -v assert | tail -1
 $R/AppRun python3.11 cleanup.py $P 2>&1 | grep -v -E "assert|leak" | tail -1
+$R/AppRun python3.11 add_logo.py $P 110 29.5 2>&1 | grep -v -E "Debug|assert|leak" | tail -1
 $R/AppRun python3.11 relabel.py $P 2>&1 | grep -v assert | tail -1
 $R/AppRun kicad-cli pcb drc --refill-zones --save-board --schematic-parity --severity-all -o /tmp/drc10.rpt $P 2>&1 | tail -1
 grep -o "^\[[a-z_]*\]" /tmp/drc10.rpt | sort | uniq -c
