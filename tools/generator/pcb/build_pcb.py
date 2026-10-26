@@ -350,9 +350,9 @@ near('R37', 'J5', 4, 2); near('R38', 'J5', 3, 2); near('R36', 'J5', 2, 1)
 near('C33', 'J8', 1, 1)
 # --- pannello frontale: espansore, antirimbalzo, disaccoppiamento OLED
 near('C22', 'U9', 16, 1); near('R43', 'U9', 9, 1)
-near('R39', 'J6', 6, 2); near('C23', 'J6', 6, 1); near('R40', 'J6', 7, 2); near('C24', 'J6', 7, 1)
-near('R41', 'J6', 8, 2); near('C25', 'J6', 8, 1); near('R42', 'J6', 9, 2); near('C26', 'J6', 9, 1)
-near('C27', 'J6', 1, 1); near('C28', 'J6', 1, 1)
+near('R39', 'U9', 4, 2); near('C23', 'U9', 4, 1); near('R40', 'U9', 5, 2); near('C24', 'U9', 5, 1)
+near('R41', 'U9', 6, 2); near('C25', 'U9', 6, 1); near('R42', 'U9', 7, 2); near('C26', 'U9', 7, 1)
+near('C27', 'J6', 2, 2); near('C28', 'J6', 2, 2)
 # --- buck 12 V -> 5 V
 near('C39', 'U12', 3, 1); near('C40', 'U12', 3, 1); near('R55', 'U12', 2, 2); near('C41', 'U12', 6, 1)
 near('C42', 'L1', 2, 1); near('C43', 'L1', 2, 1)

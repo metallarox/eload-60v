@@ -59,6 +59,7 @@ hardware/
   bom/            BOM from KiCad (CSV) and priced BOM with sources (XLSX)
 docs/
   Electronic_Load_Circuit_Walkthrough.pdf   slide deck (English)
+  assembly/       interactive HTML BOM, top/bottom assembly drawings
   eload_4ch_schematic.pdf, eload_4ch_pcb.pdf
   images/, reports/ (ERC / DRC)
 analysis/         loop model (sympy/scipy), large-signal sim, SOA/thermal plots
@@ -72,7 +73,8 @@ Schematic, PCB and the KiCad BOM are in English. The priced BOM workbook (`eload
 1. **PCB.** Use `hardware/fabrication/eload_4ch_gerbers_rev0.3.zip`: 2 layers, 1.6 mm, **2 oz** copper. Many fabs require ≥ 0.2 mm spacing with 2 oz copper, while the INA228 MSOP-10 pads are 0.15 mm apart (the project has a local DRC exception for them). Confirm with your fab, or order 1 oz outer layers.
 2. **Parts.** See `hardware/bom/eload_4ch_bom_priced.xlsx`. The electronics cost is about €126 per board at single quantities (October 2026). The four IXTH75N10L2 are about half of that and can have long factory lead times.
 3. **Mechanics and front panel.** Copper spreader, insulating thermal pad (≥ 100 V), CPU cooler with a 4-wire PWM fan, M3 nylon standoffs, M5 bolts for the DUT studs. Front panel: 2.42″ SSD1309 or 1.3″ SH1106 I²C OLED, EC11 encoder with push, OUTPUT button with LED, 10-wire ribbon (≤ 20 cm). J6 pinout: 1 3V3 · 2 GND · 3 SDA · 4 GND · 5 SCL · 6 ENC_A · 7 ENC_B · 8 ENC_SW · 9 OUTPUT · 10 LED (cathode, 470 Ω on board).
-4. **Firmware.** Not written yet. Pin map for the D1 mini Pro:
+4. **Assembly.** Open `docs/assembly/eload_4ch_ibom.html` in a browser: an interactive BOM that highlights where each part goes, with checkboxes to track sourced and placed parts. `docs/assembly/assembly_top.pdf` and `assembly_bottom.pdf` (the four MOSFETs) show every reference inside its part outline. The silkscreen has no overlaps: each reference designator is next to its component.
+5. **Firmware.** Not written yet. Pin map for the D1 mini Pro:
 
 | Pin | GPIO | Function |
 |---|---|---|
@@ -101,7 +103,7 @@ Schematic, PCB and the KiCad BOM are in English. The priced BOM workbook (`eload
 
 ## Changelog
 
-- **rev 0.3** — front panel: PCF8574 expander, 10-pin IDC connector, debounce, I²C pull-ups 2.2 kΩ. Schematic and PCB translated to English (sheets: input, channels, control, power).
+- **rev 0.3** — front panel: PCF8574 expander, 10-pin IDC connector, debounce, I²C pull-ups 2.2 kΩ. Schematic and PCB translated to English (sheets: input, channels, control, power). Silkscreen cleaned up: no overlaps, references next to their parts; interactive BOM and assembly drawings.
 - **rev 0.2** — loop compensation C6 = 1 nF, setpoint filter C5 = 10 nF (10× bandwidth, PM ≈ 80°); WiFi control with D1 mini Pro replaces STM32 + isolated USB.
 
 ## Credits
