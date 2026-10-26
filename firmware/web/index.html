@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>E-LOAD 60V</title>
+<style>
+:root{--bg:#07142a;--card:#0d1f3c;--line:#1d3557;--txt:#e6f1ff;--mut:#8aa4c4;--cy:#21c7f5;--or:#f39237;--rd:#ef4444;--gr:#22c55e}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:2px solid var(--cy);background:#061022;position:sticky;top:0;z-index:5}
+header h1{font-size:19px;margin:0;letter-spacing:.5px}header h1 b{color:var(--cy)}
+.pill{padding:4px 12px;border-radius:999px;font-weight:700;font-size:13px;background:#334155}
+.pill.on{background:var(--gr);color:#04220f}.pill.trip{background:var(--rd)}
+.sp{flex:1}.mut{color:var(--mut);font-size:13px}
+main{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,430px),1fr));gap:14px;padding:14px;max-width:1300px;margin:auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.card h2{font-size:13px;text-transform:uppercase;letter-spacing:1.4px;color:var(--cy);margin:0 0 10px}
+.wide{grid-column:1/-1}
+.big{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.big div{background:#081830;border-radius:10px;padding:10px 12px}
+.big .v{font:700 clamp(19px,5.2vw,30px)/1.1 ui-monospace,Menlo,Consolas,monospace}.big .u{color:var(--mut);font-size:13px}
+.small{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:8px}
+.small div{background:#081830;border-radius:8px;padding:6px 10px}.small .v{font:600 17px ui-monospace,monospace}
+button{background:#163257;color:var(--txt);border:1px solid #2a4d7a;border-radius:8px;padding:8px 12px;font-size:14px;cursor:pointer}
+button:hover{border-color:var(--cy)}button.pri{background:var(--cy);color:#03203a;border:none;font-weight:700}
+button.outbtn{width:100%;padding:16px;font-size:20px;font-weight:800;border:none;background:#334155}
+button.outbtn.on{background:var(--gr);color:#04220f}
+.seg{display:flex;gap:0;margin:10px 0}.seg button{flex:1;border-radius:0}.seg button:first-child{border-radius:8px 0 0 8px}.seg button:last-child{border-radius:0 8px 8px 0}
+.seg button.sel{background:var(--cy);color:#03203a;font-weight:700}
+.row{display:flex;gap:8px;align-items:center;margin:8px 0;flex-wrap:wrap}
+input,select{background:#081830;color:var(--txt);border:1px solid #2a4d7a;border-radius:8px;padding:8px 10px;font-size:15px}
+input[type=number]{width:120px}input.setp{width:150px;font:700 20px ui-monospace,monospace}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:6px 8px;text-align:right;border-bottom:1px solid var(--line)}
+th{color:var(--mut);font-weight:600;font-size:12px;text-transform:uppercase}td:first-child,th:first-child{text-align:left}
+.mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+canvas{width:100%;height:280px;background:#061226;border-radius:10px}
+.leg span{margin-right:14px;font-size:13px}.leg i{display:inline-block;width:12px;height:3px;margin-right:5px;vertical-align:middle}
+#msg{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#111827;border:1px solid var(--cy);padding:10px 16px;border-radius:10px;display:none;z-index:9}
+.trip{color:var(--rd);font-weight:700}
+label.ck{display:inline-flex;gap:4px;align-items:center;margin-right:10px}
+a{color:var(--cy)}
+@media(max-width:600px){#hdr{display:none}header h1{font-size:16px}main{padding:8px;gap:10px}.card{padding:12px}}
+</style></head><body>
+<header><svg width="34" height="34" viewBox="0 0 34 34"><circle cx="17" cy="17" r="15" fill="none" stroke="#21c7f5" stroke-width="2.5"/><path d="M6 11 Q13 11 17 23 Q21 11 28 10" fill="none" stroke="#21c7f5" stroke-width="2.2"/></svg>
+<h1>E-LOAD <b>60V</b> <span class="mut">IV3HGA</span></h1><span id="pill" class="pill">---</span><span class="sp"></span><span id="hdr" class="mut"></span></header>
+<main>
+<section class="card wide"><h2>Measurements</h2>
+<div class="big"><div><div class="v" id="mv">--</div><div class="u">V</div></div><div><div class="v" id="mi">--</div><div class="u">A total</div></div><div><div class="v" id="mp">--</div><div class="u">W total</div></div></div>
+<div class="small"><div><div class="v" id="mwh">--</div><div class="mut">Wh</div></div><div><div class="v" id="mah">--</div><div class="mut">Ah</div></div><div><div class="v" id="mt">--</div><div class="mut">°C spreader</div></div><div><div class="v" id="mfan">--</div><div class="mut">fan</div></div></div>
+</section>
+<section class="card"><h2>Control</h2>
+<button id="outb" class="outbtn" onclick="toggleOut()">OUTPUT OFF</button>
+<div id="tripbox" class="row trip" style="display:none"><span id="triptxt"></span><button onclick="post('/api/set','clear=1')">Acknowledge</button></div>
+<div class="seg" id="modes"><button data-m="CC">CC · current</button><button data-m="CP">CP · power</button><button data-m="CR">CR · resistance</button></div>
+<div class="row"><input class="setp" id="setv" type="number" step="0.001" min="0"><span id="unit" class="mut">A</span><button class="pri" onclick="applySet()">Set</button><span class="mut" id="setnow"></span></div>
+<div class="row" id="nudge"></div>
+<div class="row"><span class="mut">Channels</span><span id="mask"></span></div>
+<div class="row"><span class="mut">Cutoff voltage</span><input id="vcut" type="number" step="0.01" min="0" style="width:100px"> V <button onclick="post('/api/set','vcut='+val('vcut')+'&save=1')">Save</button><span class="mut">0 = off (battery test)</span></div>
+<div class="row"><button onclick="post('/api/set','reset=1')">Reset Wh / Ah</button><label class="ck"><input type="checkbox" id="trim" onchange="post('/api/set','trim='+(this.checked?1:0)+'&save=1')">auto-trim</label></div>
+</section>
+<section class="card"><h2>Channels</h2>
+<table><thead><tr><th>CH</th><th>I meas</th><th>I cmd</th><th>P</th><th>INA °C</th><th>trim</th></tr></thead><tbody id="chs"></tbody></table>
+<p class="mut">The total setpoint is shared evenly by the enabled channels; each channel is limited to 5 A and 75 W.</p>
+</section>
+<section class="card wide"><h2>Last 10 minutes</h2>
+<div class="leg"><span><i style="background:#21c7f5"></i>V</span><span><i style="background:#f39237"></i>A</span><span><i style="background:#22c55e"></i>W</span><span><i style="background:#e879f9"></i>°C</span></div>
+<canvas id="ch" width="1200" height="280"></canvas>
+</section>
+<section class="card"><h2>Logging</h2>
+<div class="row"><span class="mut">Interval</span><select id="lint"><option>1</option><option>2</option><option>5</option><option>10</option><option>30</option><option>60</option></select> s
+<button class="pri" id="logb" onclick="toggleLog()">Start</button></div>
+<div class="row mono" id="loginfo"></div>
+<div class="row"><a href="/log.csv"><button>Download CSV</button></a><button onclick="if(confirm('Delete the log file?'))post('/api/log','action=clear')">Delete</button></div>
+<p class="mut">Starting a log resets Wh/Ah and replaces the previous file. Columns: time, elapsed, output, mode, setpoint, V, I, P, I1–I4, Wh, Ah, °C, trip.</p>
+</section>
+<section class="card"><h2>System</h2>
+<div class="mono mut" id="sys"></div>
+<div class="row"><input id="ssid" placeholder="WiFi SSID"><input id="pass" type="password" placeholder="password"><input id="host" placeholder="hostname" style="width:110px"><button onclick="saveWifi()">Save & restart</button></div>
+<div class="row"><button onclick="post('/api/cal','action=save')">Save calibration</button><button onclick="if(confirm('Reset calibration to 1.000?'))post('/api/cal','action=reset')">Reset calibration</button><a href="/update"><button>Firmware update</button></a></div>
+</section>
+</main><div id="msg"></div>
+<script>
+const $=id=>document.getElementById(id), val=id=>encodeURIComponent($(id).value);
+let S=null, hist=[], lastUp=-1, editing=false;
+const UNITS={CC:'A',CP:'W',CR:'Ω'}, NUDGE={CC:[-1,-.1,-.01,.01,.1,1],CP:[-10,-1,-.1,.1,1,10],CR:[-10,-1,-.1,.1,1,10]};
+function msg(t){const m=$('msg');m.textContent=t;m.style.display='block';clearTimeout(m._t);m._t=setTimeout(()=>m.style.display='none',2500)}
+async function post(url,body){try{const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body});const j=await r.json();if(!j.ok)msg(j.msg);poll();return j.ok}catch(e){msg('connection error')}}
+function toggleOut(){post('/api/set','out='+(S&&S.out?0:1))}
+function applySet(){editing=false;post('/api/set','set='+val('setv'))}
+function toggleLog(){post('/api/log',S&&S.log.on?'action=stop':'action=start&interval='+$('lint').value)}
+function saveWifi(){if(confirm('Save WiFi settings and restart?'))post('/api/wifi','ssid='+val('ssid')+'&pass='+val('pass')+'&host='+val('host'))}
+document.querySelectorAll('#modes button').forEach(b=>b.onclick=()=>post('/api/set','mode='+b.dataset.m));
+$('setv').addEventListener('focus',()=>editing=true);$('setv').addEventListener('keydown',e=>{if(e.key==='Enter')applySet()});
+function f(x,d){return (x==null||isNaN(x))?'--':Number(x).toFixed(d)}
+function render(){
+ const s=S;$('mv').textContent=f(s.v,3);$('mi').textContent=f(s.i,3);$('mp').textContent=f(s.p,1);
+ $('mwh').textContent=f(s.wh,3);$('mah').textContent=f(s.ah,3);$('mt').textContent=f(s.t,1);$('mfan').textContent=Math.round(s.fan*100)+'%'+(s.rpm?' '+s.rpm+' rpm':'');
+ const p=$('pill');p.className='pill'+(s.trip?' trip':s.out?' on':'');p.textContent=s.trip?('TRIP '+s.trip):(s.out?'ON':'OFF');
+ const ob=$('outb');ob.className='outbtn'+(s.out?' on':'');ob.textContent=s.out?'OUTPUT ON':'OUTPUT OFF';
+ $('tripbox').style.display=s.trip?'flex':'none';$('triptxt').textContent='Trip: '+s.trip+(s.tripch>=0?' (CH'+(s.tripch+1)+')':'');
+ document.querySelectorAll('#modes button').forEach(b=>b.classList.toggle('sel',b.dataset.m===s.mode));
+ $('unit').textContent=UNITS[s.mode];$('setnow').textContent='now '+f(s.set,s.mode==='CC'?3:1)+' '+UNITS[s.mode]+' (max '+s.setmax+')';
+ if(!editing&&document.activeElement!==$('setv'))$('setv').value=f(s.set,s.mode==='CC'?3:2);
+ const ng=$('nudge');if(ng.dataset.m!==s.mode){ng.dataset.m=s.mode;ng.innerHTML='';NUDGE[s.mode].forEach(d=>{const b=document.createElement('button');b.textContent=(d>0?'+':'')+d;b.onclick=()=>post('/api/set','set='+Math.max(0,(S.set+d)).toFixed(4));ng.appendChild(b)})}
+ const mk=$('mask');if(mk.childElementCount===0){for(let c=0;c<4;c++){const l=document.createElement('label');l.className='ck';l.innerHTML='<input type=checkbox id=m'+c+'>'+(c+1);mk.appendChild(l);l.firstChild.onchange=()=>{let m=0;for(let k=0;k<4;k++)if($('m'+k).checked)m|=1<<k;post('/api/set','mask='+m+'&save=1')}}}
+ for(let c=0;c<4;c++)$('m'+c).checked=!!(s.mask&(1<<c));
+ if(document.activeElement!==$('vcut'))$('vcut').value=s.vcut;$('trim').checked=!!s.trim;
+ let h='';for(let c=0;c<4;c++)h+=`<tr><td>CH${c+1}${s.ina[c]?'':' <span class=trip>missing</span>'}</td><td class=mono>${f(s.ich[c],4)}</td><td class=mono>${f(s.icmd[c],3)}</td><td class=mono>${f(s.pch[c],2)}</td><td class=mono>${f(s.tdie[c],1)}</td><td class=mono>${f(s.gain[c],4)}</td></tr>`;$('chs').innerHTML=h;
+ $('logb').textContent=s.log.on?'Stop':'Start';$('logb').className=s.log.on?'':'pri';
+ $('loginfo').textContent=(s.log.on?'● recording, ':'stopped, ')+s.log.lines+' lines, '+(s.log.bytes/1024).toFixed(1)+' kB, free '+(s.log.free/1048576).toFixed(1)+' MB';
+ $('sys').innerHTML=`fw ${s.fw} · ${s.time}<br>${s.wifi.ap?'Setup access point '+s.wifi.ssid+' (password eload1234)':'WiFi '+s.wifi.ssid+' '+s.wifi.rssi+' dBm'} · ${s.wifi.ip} · ${s.wifi.host}.local`;
+ $('hdr').textContent=s.wifi.ip+' · '+s.time;
+ if(document.activeElement!==$('host')&&!$('host').value)$('host').value=s.wifi.host;
+}
+function draw(){
+ const c=$('ch'),g=c.getContext('2d'),W=c.width=c.clientWidth*devicePixelRatio,H=c.height=c.clientHeight*devicePixelRatio;
+ g.clearRect(0,0,W,H);const L=50*devicePixelRatio,R=W-10,T=10,B=H-24*devicePixelRatio;
+ g.strokeStyle='#1d3557';g.lineWidth=1;g.font=(11*devicePixelRatio)+'px system-ui';g.fillStyle='#8aa4c4';
+ for(let k=0;k<=5;k++){const y=T+(B-T)*k/5;g.beginPath();g.moveTo(L,y);g.lineTo(R,y);g.stroke()}
+ for(let k=0;k<=10;k++){const x=L+(R-L)*k/10;g.beginPath();g.moveTo(x,T);g.lineTo(x,B);g.stroke();g.fillText((10-k)+'m',x-8,H-6*devicePixelRatio)}
+ if(hist.length<2)return;const n=600;
+ const ser=[[0,'#21c7f5'],[1,'#f39237'],[2,'#22c55e'],[3,'#e879f9']];
+ ser.forEach(([k,col])=>{let mx=0;hist.forEach(s=>mx=Math.max(mx,s[k]));mx=mx>0?mx*1.1:1;g.strokeStyle=col;g.lineWidth=2*devicePixelRatio;g.beginPath();
+  hist.forEach((s,i)=>{const x=L+(R-L)*(n-hist.length+i)/(n-1),y=B-(B-T)*s[k]/mx;i?g.lineTo(x,y):g.moveTo(x,y)});g.stroke();
+  g.fillStyle=col;g.fillText(mx.toFixed(k==1?2:1),4,T+12*devicePixelRatio*(k+1))});
+}
+async function poll(){try{const r=await fetch('/api/status');S=await r.json();render();
+ if(S.up!==lastUp){lastUp=S.up;hist.push([S.v,S.i,S.p,S.t]);if(hist.length>600)hist.shift();draw()}}catch(e){$('pill').textContent='offline';$('pill').className='pill'}}
+async function loadHist(){try{const r=await fetch('/api/history');const j=await r.json();hist=j.s.map(s=>[s[0]/100,s[1]/1000,s[2]/10,s[3]]);draw()}catch(e){}}
+loadHist().then(poll);setInterval(poll,500);addEventListener('resize',draw);
+</script></body></html>

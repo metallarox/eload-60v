@@ -62,6 +62,7 @@ docs/
   assembly/       interactive HTML BOM, top/bottom assembly drawings
   eload_4ch_schematic.pdf, eload_4ch_pcb.pdf
   images/, reports/ (ERC / DRC)
+firmware/         ESP8266 firmware (Arduino core), web page, unit tests, mock server, prebuilt bin
 analysis/         loop model (sympy/scipy), large-signal sim, SOA/thermal plots
 tools/generator/  Python scripts that generated the schematic and placed/routed the PCB
 ```
@@ -74,18 +75,28 @@ Schematic, PCB and the KiCad BOM are in English. The priced BOM workbook (`eload
 2. **Parts.** See `hardware/bom/eload_4ch_bom_priced.xlsx`. The electronics cost is about €126 per board at single quantities (October 2026). The four IXTH75N10L2 are about half of that and can have long factory lead times.
 3. **Mechanics and front panel.** Copper spreader, insulating thermal pad (≥ 100 V), CPU cooler with a 4-wire PWM fan, M3 nylon standoffs, M5 bolts for the DUT studs. Front panel: 2.42″ SSD1309 or 1.3″ SH1106 I²C OLED, EC11 encoder with push, OUTPUT button with LED, 10-wire ribbon (≤ 20 cm). J6 pinout: 1 3V3 · 2 GND · 3 SDA · 4 GND · 5 SCL · 6 ENC_A · 7 ENC_B · 8 ENC_SW · 9 OUTPUT · 10 LED (cathode, 470 Ω on board).
 4. **Assembly.** Open `docs/assembly/eload_4ch_ibom.html` in a browser: an interactive BOM that highlights where each part goes, with checkboxes to track sourced and placed parts. `docs/assembly/assembly_top.pdf` and `assembly_bottom.pdf` (the four MOSFETs) show every reference inside its part outline. The silkscreen has no overlaps: each reference designator is next to its component.
-5. **Firmware.** Not written yet. Pin map for the D1 mini Pro:
+5. **Firmware.** See [firmware/README.md](firmware/README.md). A prebuilt image is in `firmware/bin/`. On first start the load opens a WiFi access point for setup; afterwards the page is at `http://eload.local`.
 
 | Pin | GPIO | Function |
 |---|---|---|
 | D1 / D2 | 5 / 4 | I²C SCL / SDA → INA228 0x40 – 0x43, PCF8574 0x20, OLED 0x3C |
 | D5 / D7 / D8 | 14 / 13 / 15 | SPI SCK / MOSI / SYNC → DAC8565 |
-| D6 | 12 | ARM_DRV (quiet at boot) — re-assign as output after `SPI.begin()` |
+| D6 | 12 | ARM_DRV (quiet at boot) — re-assigned as output after `SPI.begin()` |
 | D0 | 16 | ARM_FB read-back (100 k) |
 | D3 | 0 | PCF8574 INT (front panel) |
 | D4 | 2 | Fan PWM |
 | RX | 3 | Fan tach |
 | A0 | — | NTC1 |
+
+## Firmware
+
+v0.1.0 for the D1 mini Pro. It compiles and its control math is unit-tested, but it has **not yet run on hardware**.
+- **Control:** CC / CP / CR with the setpoint shared by the channels, hardware and firmware protections with the trip cause reported, battery cutoff, auto-trim.
+- **Front panel:** OLED with the logo at boot, encoder used as a vernier, OUTPUT button.
+- **Logging:** CSV on the 14 MB flash.
+- **Web:** live chart, controls, OTA update.
+
+![Web interface](docs/images/web_ui.png)
 
 ## ⚠️ Safety
 
@@ -103,6 +114,8 @@ Schematic, PCB and the KiCad BOM are in English. The priced BOM workbook (`eload
 
 ## Changelog
 
+- **firmware 0.1.0** — first firmware: control, protections, OLED + encoder panel, CSV logging, web interface, OTA.
+
 - **rev 0.3** — front panel: PCF8574 expander, 10-pin IDC connector, debounce, I²C pull-ups 2.2 kΩ. Schematic and PCB translated to English (sheets: input, channels, control, power). Silkscreen cleaned up: no overlaps, references next to their parts; interactive BOM and assembly drawings.
 - **rev 0.2** — loop compensation C6 = 1 nF, setpoint filter C5 = 10 nF (10× bandwidth, PM ≈ 80°); WiFi control with D1 mini Pro replaces STM32 + isolated USB.
 
@@ -113,4 +126,4 @@ Inspired by [shufps/eload2](https://github.com/shufps/eload2). Designed by IV3HG
 ## License
 
 - Hardware (everything under `hardware/` and `docs/`): **CERN-OHL-S-2.0** — see [LICENSE](LICENSE).
-- Software (`analysis/`, `tools/`): **MIT** — see [LICENSE-MIT](LICENSE-MIT).
+- Software (`firmware/`, `analysis/`, `tools/`): **MIT** — see [LICENSE-MIT](LICENSE-MIT).
