@@ -199,13 +199,29 @@ d.add(S3, g, 'Connector_Generic:Conn_01x08', 'D1mini SX', 'Connector_PinSocket_2
       {2: 'NTC1', 3: 'ARM_FB', 4: 'SPI_SCK', 5: 'ARM_DRV', 6: 'SPI_MOSI', 7: 'DAC_SYNC', 8: '+3V3'}, 'J',
       nc=('1',), note='RST A0 D0(GPIO16) D5(14) D6(12) D7(13) D8(15) 3V3; il 3V3 del modulo alimenta la logica')
 d.add(S3, g, 'Connector_Generic:Conn_01x08', 'D1mini DX', 'Connector_PinSocket_2.54mm:PinSocket_1x08_P2.54mm_Vertical',
-      {2: 'WEMOS_RX', 3: 'I2C_SCL', 4: 'I2C_SDA', 6: 'FAN_PWM_MCU', 7: 'GND', 8: '+5V_WIFI'}, 'J',
-      nc=('1', '5'), note='TX RX(GPIO3) D1(5) D2(4) D3(0) D4(2) G 5V; GPIO0/2/15 = strapping')
+      {2: 'WEMOS_RX', 3: 'I2C_SCL', 4: 'I2C_SDA', 5: 'EXP_INT', 6: 'FAN_PWM_MCU', 7: 'GND', 8: '+5V_WIFI'}, 'J',
+      nc=('1',), note='TX RX(GPIO3) D1(5) D2(4) D3(0)=INT espansore D4(2) G 5V; GPIO0/2/15 = strapping')
 r(S3, g, '1k', 'WEMOS_RX', 'FAN_TACH', note='Tach su RX: scollegare la ventola se si programma via USB')
 c(S3, g, '100n', '+3V3', 'GND')
 c(S3, g, '10u 25V', '+3V3', 'GND')
-r(S3, g, '4k7', '+3V3', 'I2C_SDA')
-r(S3, g, '4k7', '+3V3', 'I2C_SCL')
+r(S3, g, '2k2', '+3V3', 'I2C_SDA', note='Bus esteso al pannello frontale (rev 0.3)')
+r(S3, g, '2k2', '+3V3', 'I2C_SCL')
+
+g = 'Pannello frontale: OLED I2C, encoder con pulsante, tasto OUTPUT (rev 0.3)'
+d.add(S3, g, 'Interface_Expansion:PCF8574T', 'PCF8574T', 'Package_SO:SOIC-16W_7.5x10.3mm_P1.27mm',
+      {1: 'GND', 2: 'GND', 3: 'GND', 4: 'FP_ENC_A', 5: 'FP_ENC_B', 6: 'FP_ENC_SW', 7: 'FP_BTN_OUT', 8: 'GND',
+       9: 'PCF_LED', 13: 'EXP_INT', 14: 'I2C_SCL', 15: 'I2C_SDA', 16: '+3V3'}, 'U', mpn='PCF8574T/3',
+      nc=('10', '11', '12'), note='Espansore I2C @0x20; INT su GPIO0 (D3)')
+c(S3, g, '100n', '+3V3', 'GND')
+for net in ('FP_ENC_A', 'FP_ENC_B', 'FP_ENC_SW', 'FP_BTN_OUT'):
+    r(S3, g, '10k', '+3V3', net)
+    c(S3, g, '10n', net, 'GND', note='Antirimbalzo 100 us')
+r(S3, g, '470R', 'PCF_LED', 'FP_LED', note='LED OUTPUT sul pannello: anodo a 3V3, catodo qui')
+d.add(S3, g, 'Connector_Generic:Conn_02x05_Odd_Even', 'FRONT PANEL', 'Connector_IDC:IDC-Header_2x05_P2.54mm_Vertical',
+      {1: '+3V3', 2: 'GND', 3: 'I2C_SDA', 4: 'GND', 5: 'I2C_SCL', 6: 'FP_ENC_A', 7: 'FP_ENC_B', 8: 'FP_ENC_SW',
+       9: 'FP_BTN_OUT', 10: 'FP_LED'}, 'J', note='Flat 10 poli verso il pannello: OLED SSD1309/SH1106 0x3C, encoder EC11, tasto OUTPUT')
+c(S3, g, '10u 25V', '+3V3', 'GND', note='Disaccoppiamento OLED')
+c(S3, g, '100n', '+3V3', 'GND')
 
 g = 'DAC quadruplo 16 bit (riferimento interno 2,5 V)'
 d.add(S3, g, 'Analog_DAC:DAC8565', 'DAC8565', 'Package_SO:TSSOP-16_4.4x5mm_P0.65mm',
@@ -316,6 +332,7 @@ c(S4, g, '22u 10V', '+5V_WIFI', 'GND')
 c(S4, g, '22u 10V', '+5V_WIFI', 'GND')
 
 d.origins[S3] = {'Modulo WiFi Wemos D1 mini Pro (ESP8266) su strip femmina': (20, 95, 235),
+                 'Pannello frontale: OLED I2C, encoder con pulsante, tasto OUTPUT (rev 0.3)': (20, 300, 390),
                  'DAC quadruplo 16 bit (riferimento interno 2,5 V)': (262, 95, 150),
                  'Ventola 4 fili PWM e sensori NTC sullo spreader': (20, 212, 390)}
 d.origins[S1] = {'Alimentazione comparatore': (230, 142, 150)}
@@ -329,6 +346,7 @@ NOTES = [
     'ARM basso -> CLAMP alto -> i FET di clamp cortocircuitano VSET1..4 a massa. MCU in reset = carico spento.',
     'GND unica = DUT- (stella sul prigioniero J2). Controllo solo via WiFi; USB del Wemos NON isolato: usarlo solo per programmare a DUT scollegato.',
     'Firmware ESP8266: dopo SPI.begin() riassegnare GPIO12 come uscita (ARM_DRV); GPIO16 = ARM_FB; A0 = NTC1 (partitore interno 220k/100k del D1 mini).',
+    'Pannello (rev 0.3): PCF8574 @0x20 (encoder A/B/SW, tasto OUTPUT, LED), INT su GPIO0; OLED @0x3C sullo stesso bus. OUTPUT ON abilita ARM, mai automatico.',
     '#Eccezioni alla regola SMD SOIC/SOP + passivi 1206',
     'MOSFET di potenza TO-247 (montati sullo spreader), shunt WSK2512 Kelvin, diodo inversione D2PAK, TVS SMC/SMA,',
     'INA228 in VSSOP-10 (passo 0,5 mm), DAC8565 in TSSOP-16, AP63205 in TSOT-23-6, induttore SRN4018, connettori THT.',
@@ -337,5 +355,5 @@ NOTES = [
 ]
 
 if __name__ == '__main__':
-    gl = build(d, '/home/claude/out/carico_attivo', 'Carico attivo 60V 20A 300W', '0.2', '2026-10-25', NOTES)
+    gl = build(d, '/home/claude/out/carico_attivo', 'Carico attivo 60V 20A 300W', '0.3', '2026-10-25', NOTES)
     print('parti', len(d.parts), 'reti globali', sorted(gl))

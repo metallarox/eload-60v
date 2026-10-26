@@ -302,23 +302,25 @@ CH = [('R12', 'R13', 'C5', 'R14', 'C6', 'R16', 'C7', 'R15', 'U3', 3, 2, 1, 'Q1',
 WX1, WY0 = 166.5, 9.5
 place('J4', WX1, WY0, 270)
 place('J5', WX1, WY0 + 22.86, 270)
-place('U11', 140.0, 33.0, 0)
+place('U12', 140.0, 33.0, 0)
 place('L1', 140.0, 26.5, 0)
-place('U9', 112.0, 74.0, 0)
+place('U10', 112.0, 74.0, 0)
+place('U9', 122.0, 47.0, 0)
+place('J6', 110.0, 11.0, 90)
 place('Q5', 132.0, 66.0, 0)
 place('Q6', 141.0, 66.0, 0)
 place('Q7', 150.0, 66.0, 0)
-place('J6', 157.0, 80.0, 0)
-place('J7', 157.0, 90.0, 0)
+place('J7', 157.0, 80.0, 0)
+place('J8', 157.0, 90.0, 0)
 place('U1', 109.0, 92.0, 0)
 place('U2', 121.0, 92.0, 0)
-place('J8', 153.0, 107.0, 180)
+place('J9', 153.0, 107.0, 180)
 place('D4', 143.0, 112.0, 180)
 place('F2', 136.0, 112.0, 0)
-place('U10', 127.0, 112.0, 0)
+place('U11', 127.0, 112.0, 0)
 place('D5', 107.0, 120.0, 0)
-for r in ('J4', 'J5', 'U11', 'L1', 'U9', 'Q5', 'Q6', 'Q7', 'J6', 'J7', 'U1', 'U2',
-          'J8', 'D4', 'F2', 'U10', 'D5'):
+for r in ('J4', 'J5', 'U12', 'L1', 'U10', 'U9', 'J6', 'Q5', 'Q6', 'Q7', 'J7', 'J8', 'U1', 'U2',
+          'J9', 'D4', 'F2', 'U11', 'D5'):
     reserve(r)
 # area occupata dal corpo del modulo (niente componenti sotto)
 placed_rects.append((147.0, 7.0, 170.0, 35.0))
@@ -345,23 +347,28 @@ near('R1', 'J3', 1, 1); near('R3', 'J3', 2, 2); near('D3', 'R1', 2, 1); near('C2
 # --- Wemos: disaccoppiamento 3V3, pull-up I2C, tach su RX
 near('C20', 'J4', 8, 1); near('C21', 'J4', 8, 1)
 near('R37', 'J5', 4, 2); near('R38', 'J5', 3, 2); near('R36', 'J5', 2, 1)
-near('C26', 'J7', 1, 1)
+near('C33', 'J8', 1, 1)
+# --- pannello frontale: espansore, antirimbalzo, disaccoppiamento OLED
+near('C22', 'U9', 16, 1); near('R43', 'U9', 9, 1)
+near('R39', 'J6', 6, 2); near('C23', 'J6', 6, 1); near('R40', 'J6', 7, 2); near('C24', 'J6', 7, 1)
+near('R41', 'J6', 8, 2); near('C25', 'J6', 8, 1); near('R42', 'J6', 9, 2); near('C26', 'J6', 9, 1)
+near('C27', 'J6', 1, 1); near('C28', 'J6', 1, 1)
 # --- buck 12 V -> 5 V
-near('C32', 'U11', 3, 1); near('C33', 'U11', 3, 1); near('R50', 'U11', 2, 2); near('C34', 'U11', 6, 1)
-near('C35', 'L1', 2, 1); near('C36', 'L1', 2, 1)
+near('C39', 'U12', 3, 1); near('C40', 'U12', 3, 1); near('R55', 'U12', 2, 2); near('C41', 'U12', 6, 1)
+near('C42', 'L1', 2, 1); near('C43', 'L1', 2, 1)
 # --- DAC
-near('C22', 'U9', 3, 1); near('C23', 'U9', 4, 1); near('C24', 'U9', 4, 1); near('C25', 'U9', 12, 1); near('R39', 'U9', 13, 2)
+near('C29', 'U10', 3, 1); near('C30', 'U10', 4, 1); near('C31', 'U10', 4, 1); near('C32', 'U10', 12, 1); near('R44', 'U10', 13, 2)
 # --- NTC
-near('R47', 'J7', 1, 2); near('R48', 'J7', 3, 2); near('C27', 'J7', 3, 1)
+near('R52', 'J8', 1, 2); near('R53', 'J8', 3, 2); near('C34', 'J8', 3, 1)
 # --- logica ARM/CLAMP e ventola
-near('R41', 'Q5', 2, 1); near('R40', 'Q5', 2, 2); near('R42', 'Q5', 2, 1); near('R43', 'Q5', 7, 2)
-near('R44', 'Q7', 4, 2); near('R45', 'Q7', 4, 1); near('R46', 'J6', 3, 2)
+near('R46', 'Q5', 2, 1); near('R45', 'Q5', 2, 2); near('R47', 'Q5', 2, 1); near('R48', 'Q5', 7, 2)
+near('R49', 'Q7', 4, 2); near('R50', 'Q7', 4, 1); near('R51', 'J7', 3, 2)
 # --- riferimento e comparatori
 near('R4', 'U1', 1, 2); near('C4', 'U2', 8, 1)
 near('R5', 'U2', 3, 2); near('R6', 'U2', 3, 1); near('R8', 'U2', 2, 1); near('C3', 'U2', 2, 1)
 near('R10', 'U2', 6, 1); near('R9', 'U2', 6, 2); near('R11', 'U2', 5, 1)
 # --- alimentazioni
-near('C28', 'U10', 8, 1); near('C29', 'U10', 8, 1); near('C30', 'U10', 1, 1); near('C31', 'D5', 2, 1); near('R49', 'D5', 2, 2)
+near('C35', 'U11', 8, 1); near('C36', 'U11', 8, 1); near('C37', 'U11', 1, 1); near('C38', 'D5', 2, 1); near('R54', 'D5', 2, 2)
 
 # fori di montaggio: angoli + distanziali verso lo spreader
 holes = [(4, 4), (W - 4, 4), (4, H - 4), (W - 4, H - 4), (35, 47), (89, 47), (35, 77), (89, 77)]
@@ -407,12 +414,13 @@ text(pcbnew.F_SilkS, 'DUT+', 9, 20, 2.0)
 text(pcbnew.F_SilkS, 'DUT-', 9, 105, 2.0)
 text(pcbnew.F_SilkS, 'SENSE +/-', 8.5, 53.5, 1.2)
 text(pcbnew.F_SilkS, '12V AUX', 160, 99, 1.2)
+text(pcbnew.F_SilkS, 'FRONT PANEL', 115, 3.2, 1.1)
 rect(pcbnew.F_Fab, 147.5, 8.1, 169.9, 33.8, 0.12)
 text(pcbnew.Cmts_User, 'Antenna Wemos oltre il bordo: niente rame per x > 164 mm', 150, 37.5, 0.8)
 text(pcbnew.F_SilkS, 'WEMOS D1 mini Pro  (antenna ->)', 156, 21.0, 1.0)
 text(pcbnew.F_SilkS, 'FAN', 167, 80, 1.2)
 text(pcbnew.F_SilkS, 'NTC', 167, 90, 1.2)
-text(pcbnew.F_SilkS, 'E-LOAD 4CH 60V 20A 300W  rev 0.2  IV3HGA', 128, 121.5, 1.3)
+text(pcbnew.F_SilkS, 'E-LOAD 4CH 60V 20A 300W  rev 0.3  IV3HGA', 128, 121.5, 1.3)
 text(pcbnew.F_SilkS, '! 60 V !', 62, 44, 2.0)
 for i, cx in enumerate(CX):
     text(pcbnew.F_SilkS, 'CH%d' % (i + 1), cx, 41, 1.5)
