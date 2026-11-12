@@ -121,9 +121,6 @@ v0.2.0 for the D1 mini Pro. It compiles and its control math is unit-tested, but
 - **rev 0.3** — front panel: PCF8574 expander, 10-pin IDC connector, debounce, I²C pull-ups 2.2 kΩ. Schematic and PCB translated to English (sheets: input, channels, control, power). Silkscreen cleaned up: no overlaps, references next to their parts; interactive BOM and assembly drawings.
 - **rev 0.2** — loop compensation C6 = 1 nF, setpoint filter C5 = 10 nF (10× bandwidth, PM ≈ 80°); WiFi control with D1 mini Pro replaces STM32 + isolated USB.
 
-## Credits
-
-Inspired by [shufps/eload2](https://github.com/shufps/eload2). Designed by IV3HGA.
 
 ## License
 
